@@ -30,6 +30,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/repeated_field.h>  // IWYU pragma: export
 #include <google/protobuf/extension_set.h>  // IWYU pragma: export
+#include <google/protobuf/generated_enum_reflection.h>
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 #include <google/protobuf/port_def.inc>
@@ -61,6 +62,33 @@ PROTOBUF_NAMESPACE_OPEN
 template<> ::Payload* Arena::CreateMaybeMessage<::Payload>(Arena*);
 PROTOBUF_NAMESPACE_CLOSE
 
+enum Payload_PayloadFlag : int {
+  Payload_PayloadFlag_general_chat = 0,
+  Payload_PayloadFlag_private_chat = 1,
+  Payload_PayloadFlag_update_status = 2,
+  Payload_PayloadFlag_user_info = 3,
+  Payload_PayloadFlag_user_list = 4,
+  Payload_PayloadFlag_register_ = 5
+};
+bool Payload_PayloadFlag_IsValid(int value);
+constexpr Payload_PayloadFlag Payload_PayloadFlag_PayloadFlag_MIN = Payload_PayloadFlag_general_chat;
+constexpr Payload_PayloadFlag Payload_PayloadFlag_PayloadFlag_MAX = Payload_PayloadFlag_register_;
+constexpr int Payload_PayloadFlag_PayloadFlag_ARRAYSIZE = Payload_PayloadFlag_PayloadFlag_MAX + 1;
+
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Payload_PayloadFlag_descriptor();
+template<typename T>
+inline const std::string& Payload_PayloadFlag_Name(T enum_t_value) {
+  static_assert(::std::is_same<T, Payload_PayloadFlag>::value ||
+    ::std::is_integral<T>::value,
+    "Incorrect type passed to function Payload_PayloadFlag_Name.");
+  return ::PROTOBUF_NAMESPACE_ID::internal::NameOfEnum(
+    Payload_PayloadFlag_descriptor(), enum_t_value);
+}
+inline bool Payload_PayloadFlag_Parse(
+    ::PROTOBUF_NAMESPACE_ID::ConstStringParam name, Payload_PayloadFlag* value) {
+  return ::PROTOBUF_NAMESPACE_ID::internal::ParseNamedEnum<Payload_PayloadFlag>(
+    Payload_PayloadFlag_descriptor(), name, value);
+}
 // ===================================================================
 
 class Payload PROTOBUF_FINAL :
@@ -180,13 +208,53 @@ class Payload PROTOBUF_FINAL :
 
   // nested types ----------------------------------------------------
 
+  typedef Payload_PayloadFlag PayloadFlag;
+  static constexpr PayloadFlag general_chat =
+    Payload_PayloadFlag_general_chat;
+  static constexpr PayloadFlag private_chat =
+    Payload_PayloadFlag_private_chat;
+  static constexpr PayloadFlag update_status =
+    Payload_PayloadFlag_update_status;
+  static constexpr PayloadFlag user_info =
+    Payload_PayloadFlag_user_info;
+  static constexpr PayloadFlag user_list =
+    Payload_PayloadFlag_user_list;
+  static constexpr PayloadFlag register_ =
+    Payload_PayloadFlag_register_;
+  static inline bool PayloadFlag_IsValid(int value) {
+    return Payload_PayloadFlag_IsValid(value);
+  }
+  static constexpr PayloadFlag PayloadFlag_MIN =
+    Payload_PayloadFlag_PayloadFlag_MIN;
+  static constexpr PayloadFlag PayloadFlag_MAX =
+    Payload_PayloadFlag_PayloadFlag_MAX;
+  static constexpr int PayloadFlag_ARRAYSIZE =
+    Payload_PayloadFlag_PayloadFlag_ARRAYSIZE;
+  static inline const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor*
+  PayloadFlag_descriptor() {
+    return Payload_PayloadFlag_descriptor();
+  }
+  template<typename T>
+  static inline const std::string& PayloadFlag_Name(T enum_t_value) {
+    static_assert(::std::is_same<T, PayloadFlag>::value ||
+      ::std::is_integral<T>::value,
+      "Incorrect type passed to function PayloadFlag_Name.");
+    return Payload_PayloadFlag_Name(enum_t_value);
+  }
+  static inline bool PayloadFlag_Parse(::PROTOBUF_NAMESPACE_ID::ConstStringParam name,
+      PayloadFlag* value) {
+    return Payload_PayloadFlag_Parse(name, value);
+  }
+
   // accessors -------------------------------------------------------
 
   enum : int {
     kSenderFieldNumber = 1,
-    kMessageFieldNumber = 2,
-    kFlagFieldNumber = 3,
-    kExtraFieldNumber = 4,
+    kIpFieldNumber = 2,
+    kMessageFieldNumber = 3,
+    kExtraFieldNumber = 5,
+    kFlagFieldNumber = 4,
+    kCodeFieldNumber = 6,
   };
   // optional string sender = 1;
   bool has_sender() const;
@@ -208,7 +276,27 @@ class Payload PROTOBUF_FINAL :
   std::string* _internal_mutable_sender();
   public:
 
-  // optional string message = 2;
+  // optional string ip = 2;
+  bool has_ip() const;
+  private:
+  bool _internal_has_ip() const;
+  public:
+  void clear_ip();
+  const std::string& ip() const;
+  void set_ip(const std::string& value);
+  void set_ip(std::string&& value);
+  void set_ip(const char* value);
+  void set_ip(const char* value, size_t size);
+  std::string* mutable_ip();
+  std::string* release_ip();
+  void set_allocated_ip(std::string* ip);
+  private:
+  const std::string& _internal_ip() const;
+  void _internal_set_ip(const std::string& value);
+  std::string* _internal_mutable_ip();
+  public:
+
+  // optional string message = 3;
   bool has_message() const;
   private:
   bool _internal_has_message() const;
@@ -228,27 +316,7 @@ class Payload PROTOBUF_FINAL :
   std::string* _internal_mutable_message();
   public:
 
-  // optional string flag = 3;
-  bool has_flag() const;
-  private:
-  bool _internal_has_flag() const;
-  public:
-  void clear_flag();
-  const std::string& flag() const;
-  void set_flag(const std::string& value);
-  void set_flag(std::string&& value);
-  void set_flag(const char* value);
-  void set_flag(const char* value, size_t size);
-  std::string* mutable_flag();
-  std::string* release_flag();
-  void set_allocated_flag(std::string* flag);
-  private:
-  const std::string& _internal_flag() const;
-  void _internal_set_flag(const std::string& value);
-  std::string* _internal_mutable_flag();
-  public:
-
-  // optional string extra = 4;
+  // optional string extra = 5;
   bool has_extra() const;
   private:
   bool _internal_has_extra() const;
@@ -268,6 +336,32 @@ class Payload PROTOBUF_FINAL :
   std::string* _internal_mutable_extra();
   public:
 
+  // optional .Payload.PayloadFlag flag = 4;
+  bool has_flag() const;
+  private:
+  bool _internal_has_flag() const;
+  public:
+  void clear_flag();
+  ::Payload_PayloadFlag flag() const;
+  void set_flag(::Payload_PayloadFlag value);
+  private:
+  ::Payload_PayloadFlag _internal_flag() const;
+  void _internal_set_flag(::Payload_PayloadFlag value);
+  public:
+
+  // optional int32 code = 6;
+  bool has_code() const;
+  private:
+  bool _internal_has_code() const;
+  public:
+  void clear_code();
+  ::PROTOBUF_NAMESPACE_ID::int32 code() const;
+  void set_code(::PROTOBUF_NAMESPACE_ID::int32 value);
+  private:
+  ::PROTOBUF_NAMESPACE_ID::int32 _internal_code() const;
+  void _internal_set_code(::PROTOBUF_NAMESPACE_ID::int32 value);
+  public:
+
   // @@protoc_insertion_point(class_scope:Payload)
  private:
   class _Internal;
@@ -278,9 +372,11 @@ class Payload PROTOBUF_FINAL :
   ::PROTOBUF_NAMESPACE_ID::internal::HasBits<1> _has_bits_;
   mutable ::PROTOBUF_NAMESPACE_ID::internal::CachedSize _cached_size_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr sender_;
+  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr ip_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr message_;
-  ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr flag_;
   ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr extra_;
+  int flag_;
+  ::PROTOBUF_NAMESPACE_ID::int32 code_;
   friend struct ::TableStruct_payload_2eproto;
 };
 // ===================================================================
@@ -367,9 +463,82 @@ inline void Payload::set_allocated_sender(std::string* sender) {
   // @@protoc_insertion_point(field_set_allocated:Payload.sender)
 }
 
-// optional string message = 2;
-inline bool Payload::_internal_has_message() const {
+// optional string ip = 2;
+inline bool Payload::_internal_has_ip() const {
   bool value = (_has_bits_[0] & 0x00000002u) != 0;
+  return value;
+}
+inline bool Payload::has_ip() const {
+  return _internal_has_ip();
+}
+inline void Payload::clear_ip() {
+  ip_.ClearToEmpty();
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline const std::string& Payload::ip() const {
+  // @@protoc_insertion_point(field_get:Payload.ip)
+  return _internal_ip();
+}
+inline void Payload::set_ip(const std::string& value) {
+  _internal_set_ip(value);
+  // @@protoc_insertion_point(field_set:Payload.ip)
+}
+inline std::string* Payload::mutable_ip() {
+  // @@protoc_insertion_point(field_mutable:Payload.ip)
+  return _internal_mutable_ip();
+}
+inline const std::string& Payload::_internal_ip() const {
+  return ip_.Get();
+}
+inline void Payload::_internal_set_ip(const std::string& value) {
+  _has_bits_[0] |= 0x00000002u;
+  ip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
+}
+inline void Payload::set_ip(std::string&& value) {
+  _has_bits_[0] |= 0x00000002u;
+  ip_.Set(
+    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
+  // @@protoc_insertion_point(field_set_rvalue:Payload.ip)
+}
+inline void Payload::set_ip(const char* value) {
+  GOOGLE_DCHECK(value != nullptr);
+  _has_bits_[0] |= 0x00000002u;
+  ip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
+  // @@protoc_insertion_point(field_set_char:Payload.ip)
+}
+inline void Payload::set_ip(const char* value,
+    size_t size) {
+  _has_bits_[0] |= 0x00000002u;
+  ip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
+      reinterpret_cast<const char*>(value), size), GetArena());
+  // @@protoc_insertion_point(field_set_pointer:Payload.ip)
+}
+inline std::string* Payload::_internal_mutable_ip() {
+  _has_bits_[0] |= 0x00000002u;
+  return ip_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
+}
+inline std::string* Payload::release_ip() {
+  // @@protoc_insertion_point(field_release:Payload.ip)
+  if (!_internal_has_ip()) {
+    return nullptr;
+  }
+  _has_bits_[0] &= ~0x00000002u;
+  return ip_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+}
+inline void Payload::set_allocated_ip(std::string* ip) {
+  if (ip != nullptr) {
+    _has_bits_[0] |= 0x00000002u;
+  } else {
+    _has_bits_[0] &= ~0x00000002u;
+  }
+  ip_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), ip,
+      GetArena());
+  // @@protoc_insertion_point(field_set_allocated:Payload.ip)
+}
+
+// optional string message = 3;
+inline bool Payload::_internal_has_message() const {
+  bool value = (_has_bits_[0] & 0x00000004u) != 0;
   return value;
 }
 inline bool Payload::has_message() const {
@@ -377,7 +546,7 @@ inline bool Payload::has_message() const {
 }
 inline void Payload::clear_message() {
   message_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline const std::string& Payload::message() const {
   // @@protoc_insertion_point(field_get:Payload.message)
@@ -395,30 +564,30 @@ inline const std::string& Payload::_internal_message() const {
   return message_.Get();
 }
 inline void Payload::_internal_set_message(const std::string& value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
 }
 inline void Payload::set_message(std::string&& value) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   message_.Set(
     ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
   // @@protoc_insertion_point(field_set_rvalue:Payload.message)
 }
 inline void Payload::set_message(const char* value) {
   GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
   // @@protoc_insertion_point(field_set_char:Payload.message)
 }
 inline void Payload::set_message(const char* value,
     size_t size) {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
       reinterpret_cast<const char*>(value), size), GetArena());
   // @@protoc_insertion_point(field_set_pointer:Payload.message)
 }
 inline std::string* Payload::_internal_mutable_message() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
   return message_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
 }
 inline std::string* Payload::release_message() {
@@ -426,94 +595,50 @@ inline std::string* Payload::release_message() {
   if (!_internal_has_message()) {
     return nullptr;
   }
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
   return message_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
 }
 inline void Payload::set_allocated_message(std::string* message) {
   if (message != nullptr) {
-    _has_bits_[0] |= 0x00000002u;
+    _has_bits_[0] |= 0x00000004u;
   } else {
-    _has_bits_[0] &= ~0x00000002u;
+    _has_bits_[0] &= ~0x00000004u;
   }
   message_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), message,
       GetArena());
   // @@protoc_insertion_point(field_set_allocated:Payload.message)
 }
 
-// optional string flag = 3;
+// optional .Payload.PayloadFlag flag = 4;
 inline bool Payload::_internal_has_flag() const {
-  bool value = (_has_bits_[0] & 0x00000004u) != 0;
+  bool value = (_has_bits_[0] & 0x00000010u) != 0;
   return value;
 }
 inline bool Payload::has_flag() const {
   return _internal_has_flag();
 }
 inline void Payload::clear_flag() {
-  flag_.ClearToEmpty();
-  _has_bits_[0] &= ~0x00000004u;
+  flag_ = 0;
+  _has_bits_[0] &= ~0x00000010u;
 }
-inline const std::string& Payload::flag() const {
+inline ::Payload_PayloadFlag Payload::_internal_flag() const {
+  return static_cast< ::Payload_PayloadFlag >(flag_);
+}
+inline ::Payload_PayloadFlag Payload::flag() const {
   // @@protoc_insertion_point(field_get:Payload.flag)
   return _internal_flag();
 }
-inline void Payload::set_flag(const std::string& value) {
+inline void Payload::_internal_set_flag(::Payload_PayloadFlag value) {
+  assert(::Payload_PayloadFlag_IsValid(value));
+  _has_bits_[0] |= 0x00000010u;
+  flag_ = value;
+}
+inline void Payload::set_flag(::Payload_PayloadFlag value) {
   _internal_set_flag(value);
   // @@protoc_insertion_point(field_set:Payload.flag)
 }
-inline std::string* Payload::mutable_flag() {
-  // @@protoc_insertion_point(field_mutable:Payload.flag)
-  return _internal_mutable_flag();
-}
-inline const std::string& Payload::_internal_flag() const {
-  return flag_.Get();
-}
-inline void Payload::_internal_set_flag(const std::string& value) {
-  _has_bits_[0] |= 0x00000004u;
-  flag_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, value, GetArena());
-}
-inline void Payload::set_flag(std::string&& value) {
-  _has_bits_[0] |= 0x00000004u;
-  flag_.Set(
-    ::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::move(value), GetArena());
-  // @@protoc_insertion_point(field_set_rvalue:Payload.flag)
-}
-inline void Payload::set_flag(const char* value) {
-  GOOGLE_DCHECK(value != nullptr);
-  _has_bits_[0] |= 0x00000004u;
-  flag_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(value), GetArena());
-  // @@protoc_insertion_point(field_set_char:Payload.flag)
-}
-inline void Payload::set_flag(const char* value,
-    size_t size) {
-  _has_bits_[0] |= 0x00000004u;
-  flag_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, ::std::string(
-      reinterpret_cast<const char*>(value), size), GetArena());
-  // @@protoc_insertion_point(field_set_pointer:Payload.flag)
-}
-inline std::string* Payload::_internal_mutable_flag() {
-  _has_bits_[0] |= 0x00000004u;
-  return flag_.Mutable(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, GetArena());
-}
-inline std::string* Payload::release_flag() {
-  // @@protoc_insertion_point(field_release:Payload.flag)
-  if (!_internal_has_flag()) {
-    return nullptr;
-  }
-  _has_bits_[0] &= ~0x00000004u;
-  return flag_.ReleaseNonDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-}
-inline void Payload::set_allocated_flag(std::string* flag) {
-  if (flag != nullptr) {
-    _has_bits_[0] |= 0x00000004u;
-  } else {
-    _has_bits_[0] &= ~0x00000004u;
-  }
-  flag_.SetAllocated(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), flag,
-      GetArena());
-  // @@protoc_insertion_point(field_set_allocated:Payload.flag)
-}
 
-// optional string extra = 4;
+// optional string extra = 5;
 inline bool Payload::_internal_has_extra() const {
   bool value = (_has_bits_[0] & 0x00000008u) != 0;
   return value;
@@ -586,12 +711,50 @@ inline void Payload::set_allocated_extra(std::string* extra) {
   // @@protoc_insertion_point(field_set_allocated:Payload.extra)
 }
 
+// optional int32 code = 6;
+inline bool Payload::_internal_has_code() const {
+  bool value = (_has_bits_[0] & 0x00000020u) != 0;
+  return value;
+}
+inline bool Payload::has_code() const {
+  return _internal_has_code();
+}
+inline void Payload::clear_code() {
+  code_ = 0;
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Payload::_internal_code() const {
+  return code_;
+}
+inline ::PROTOBUF_NAMESPACE_ID::int32 Payload::code() const {
+  // @@protoc_insertion_point(field_get:Payload.code)
+  return _internal_code();
+}
+inline void Payload::_internal_set_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _has_bits_[0] |= 0x00000020u;
+  code_ = value;
+}
+inline void Payload::set_code(::PROTOBUF_NAMESPACE_ID::int32 value) {
+  _internal_set_code(value);
+  // @@protoc_insertion_point(field_set:Payload.code)
+}
+
 #ifdef __GNUC__
   #pragma GCC diagnostic pop
 #endif  // __GNUC__
 
 // @@protoc_insertion_point(namespace_scope)
 
+
+PROTOBUF_NAMESPACE_OPEN
+
+template <> struct is_proto_enum< ::Payload_PayloadFlag> : ::std::true_type {};
+template <>
+inline const EnumDescriptor* GetEnumDescriptor< ::Payload_PayloadFlag>() {
+  return ::Payload_PayloadFlag_descriptor();
+}
+
+PROTOBUF_NAMESPACE_CLOSE
 
 // @@protoc_insertion_point(global_scope)
 

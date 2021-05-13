@@ -19,9 +19,12 @@ PROTOBUF_PRAGMA_INIT_SEG
 constexpr Payload::Payload(
   ::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized)
   : sender_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , ip_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
   , message_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , flag_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
-  , extra_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string){}
+  , extra_(&::PROTOBUF_NAMESPACE_ID::internal::fixed_address_empty_string)
+  , flag_(0)
+
+  , code_(0){}
 struct PayloadDefaultTypeInternal {
   constexpr PayloadDefaultTypeInternal()
     : _instance(::PROTOBUF_NAMESPACE_ID::internal::ConstantInitialized{}) {}
@@ -32,7 +35,7 @@ struct PayloadDefaultTypeInternal {
 };
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT PayloadDefaultTypeInternal _Payload_default_instance_;
 static ::PROTOBUF_NAMESPACE_ID::Metadata file_level_metadata_payload_2eproto[1];
-static constexpr ::PROTOBUF_NAMESPACE_ID::EnumDescriptor const** file_level_enum_descriptors_payload_2eproto = nullptr;
+static const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* file_level_enum_descriptors_payload_2eproto[1];
 static constexpr ::PROTOBUF_NAMESPACE_ID::ServiceDescriptor const** file_level_service_descriptors_payload_2eproto = nullptr;
 
 const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_payload_2eproto::offsets[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
@@ -42,16 +45,20 @@ const ::PROTOBUF_NAMESPACE_ID::uint32 TableStruct_payload_2eproto::offsets[] PRO
   ~0u,  // no _oneof_case_
   ~0u,  // no _weak_field_map_
   PROTOBUF_FIELD_OFFSET(::Payload, sender_),
+  PROTOBUF_FIELD_OFFSET(::Payload, ip_),
   PROTOBUF_FIELD_OFFSET(::Payload, message_),
   PROTOBUF_FIELD_OFFSET(::Payload, flag_),
   PROTOBUF_FIELD_OFFSET(::Payload, extra_),
+  PROTOBUF_FIELD_OFFSET(::Payload, code_),
   0,
   1,
   2,
+  4,
   3,
+  5,
 };
 static const ::PROTOBUF_NAMESPACE_ID::internal::MigrationSchema schemas[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) = {
-  { 0, 9, sizeof(::Payload)},
+  { 0, 11, sizeof(::Payload)},
 };
 
 static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] = {
@@ -59,13 +66,17 @@ static ::PROTOBUF_NAMESPACE_ID::Message const * const file_default_instances[] =
 };
 
 const char descriptor_table_protodef_payload_2eproto[] PROTOBUF_SECTION_VARIABLE(protodesc_cold) =
-  "\n\rpayload.proto\"G\n\007Payload\022\016\n\006sender\030\001 \001"
-  "(\t\022\017\n\007message\030\002 \001(\t\022\014\n\004flag\030\003 \001(\t\022\r\n\005ext"
-  "ra\030\004 \001(\t"
+  "\n\rpayload.proto\"\351\001\n\007Payload\022\016\n\006sender\030\001 "
+  "\001(\t\022\n\n\002ip\030\002 \001(\t\022\017\n\007message\030\003 \001(\t\022\"\n\004flag"
+  "\030\004 \001(\0162\024.Payload.PayloadFlag\022\r\n\005extra\030\005 "
+  "\001(\t\022\014\n\004code\030\006 \001(\005\"p\n\013PayloadFlag\022\020\n\014gene"
+  "ral_chat\020\000\022\020\n\014private_chat\020\001\022\021\n\rupdate_s"
+  "tatus\020\002\022\r\n\tuser_info\020\003\022\r\n\tuser_list\020\004\022\014\n"
+  "\010register\020\005"
   ;
 static ::PROTOBUF_NAMESPACE_ID::internal::once_flag descriptor_table_payload_2eproto_once;
 const ::PROTOBUF_NAMESPACE_ID::internal::DescriptorTable descriptor_table_payload_2eproto = {
-  false, false, 88, descriptor_table_protodef_payload_2eproto, "payload.proto", 
+  false, false, 251, descriptor_table_protodef_payload_2eproto, "payload.proto", 
   &descriptor_table_payload_2eproto_once, nullptr, 0, 1,
   schemas, file_default_instances, TableStruct_payload_2eproto::offsets,
   file_level_metadata_payload_2eproto, file_level_enum_descriptors_payload_2eproto, file_level_service_descriptors_payload_2eproto,
@@ -78,6 +89,35 @@ descriptor_table_payload_2eproto_metadata_getter(int index) {
 
 // Force running AddDescriptors() at dynamic initialization time.
 PROTOBUF_ATTRIBUTE_INIT_PRIORITY static ::PROTOBUF_NAMESPACE_ID::internal::AddDescriptorsRunner dynamic_init_dummy_payload_2eproto(&descriptor_table_payload_2eproto);
+const ::PROTOBUF_NAMESPACE_ID::EnumDescriptor* Payload_PayloadFlag_descriptor() {
+  ::PROTOBUF_NAMESPACE_ID::internal::AssignDescriptors(&descriptor_table_payload_2eproto);
+  return file_level_enum_descriptors_payload_2eproto[0];
+}
+bool Payload_PayloadFlag_IsValid(int value) {
+  switch (value) {
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+      return true;
+    default:
+      return false;
+  }
+}
+
+#if (__cplusplus < 201703) && (!defined(_MSC_VER) || _MSC_VER >= 1900)
+constexpr Payload_PayloadFlag Payload::general_chat;
+constexpr Payload_PayloadFlag Payload::private_chat;
+constexpr Payload_PayloadFlag Payload::update_status;
+constexpr Payload_PayloadFlag Payload::user_info;
+constexpr Payload_PayloadFlag Payload::user_list;
+constexpr Payload_PayloadFlag Payload::register_;
+constexpr Payload_PayloadFlag Payload::PayloadFlag_MIN;
+constexpr Payload_PayloadFlag Payload::PayloadFlag_MAX;
+constexpr int Payload::PayloadFlag_ARRAYSIZE;
+#endif  // (__cplusplus < 201703) && (!defined(_MSC_VER) || _MSC_VER >= 1900)
 
 // ===================================================================
 
@@ -87,14 +127,20 @@ class Payload::_Internal {
   static void set_has_sender(HasBits* has_bits) {
     (*has_bits)[0] |= 1u;
   }
-  static void set_has_message(HasBits* has_bits) {
+  static void set_has_ip(HasBits* has_bits) {
     (*has_bits)[0] |= 2u;
   }
-  static void set_has_flag(HasBits* has_bits) {
+  static void set_has_message(HasBits* has_bits) {
     (*has_bits)[0] |= 4u;
+  }
+  static void set_has_flag(HasBits* has_bits) {
+    (*has_bits)[0] |= 16u;
   }
   static void set_has_extra(HasBits* has_bits) {
     (*has_bits)[0] |= 8u;
+  }
+  static void set_has_code(HasBits* has_bits) {
+    (*has_bits)[0] |= 32u;
   }
 };
 
@@ -113,14 +159,14 @@ Payload::Payload(const Payload& from)
     sender_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_sender(), 
       GetArena());
   }
+  ip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  if (from._internal_has_ip()) {
+    ip_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_ip(), 
+      GetArena());
+  }
   message_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   if (from._internal_has_message()) {
     message_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_message(), 
-      GetArena());
-  }
-  flag_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  if (from._internal_has_flag()) {
-    flag_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_flag(), 
       GetArena());
   }
   extra_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
@@ -128,14 +174,21 @@ Payload::Payload(const Payload& from)
     extra_.Set(::PROTOBUF_NAMESPACE_ID::internal::ArenaStringPtr::EmptyDefault{}, from._internal_extra(), 
       GetArena());
   }
+  ::memcpy(&flag_, &from.flag_,
+    static_cast<size_t>(reinterpret_cast<char*>(&code_) -
+    reinterpret_cast<char*>(&flag_)) + sizeof(code_));
   // @@protoc_insertion_point(copy_constructor:Payload)
 }
 
 void Payload::SharedCtor() {
 sender_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+ip_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 message_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-flag_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 extra_.UnsafeSetDefault(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+::memset(reinterpret_cast<char*>(this) + static_cast<size_t>(
+    reinterpret_cast<char*>(&flag_) - reinterpret_cast<char*>(this)),
+    0, static_cast<size_t>(reinterpret_cast<char*>(&code_) -
+    reinterpret_cast<char*>(&flag_)) + sizeof(code_));
 }
 
 Payload::~Payload() {
@@ -147,8 +200,8 @@ Payload::~Payload() {
 void Payload::SharedDtor() {
   GOOGLE_DCHECK(GetArena() == nullptr);
   sender_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
+  ip_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   message_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
-  flag_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
   extra_.DestroyNoArena(&::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited());
 }
 
@@ -174,14 +227,19 @@ void Payload::Clear() {
       sender_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000002u) {
-      message_.ClearNonDefaultToEmpty();
+      ip_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000004u) {
-      flag_.ClearNonDefaultToEmpty();
+      message_.ClearNonDefaultToEmpty();
     }
     if (cached_has_bits & 0x00000008u) {
       extra_.ClearNonDefaultToEmpty();
     }
+  }
+  if (cached_has_bits & 0x00000030u) {
+    ::memset(&flag_, 0, static_cast<size_t>(
+        reinterpret_cast<char*>(&code_) -
+        reinterpret_cast<char*>(&flag_)) + sizeof(code_));
   }
   _has_bits_.Clear();
   _internal_metadata_.Clear<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>();
@@ -206,9 +264,20 @@ const char* Payload::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string message = 2;
+      // optional string ip = 2;
       case 2:
         if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 18)) {
+          auto str = _internal_mutable_ip();
+          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
+          #ifndef NDEBUG
+          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Payload.ip");
+          #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional string message = 3;
+      case 3:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
           auto str = _internal_mutable_message();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
@@ -217,25 +286,34 @@ const char* Payload::_InternalParse(const char* ptr, ::PROTOBUF_NAMESPACE_ID::in
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
-      // optional string flag = 3;
-      case 3:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 26)) {
-          auto str = _internal_mutable_flag();
-          ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
-          #ifndef NDEBUG
-          ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Payload.flag");
-          #endif  // !NDEBUG
+      // optional .Payload.PayloadFlag flag = 4;
+      case 4:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 32)) {
+          ::PROTOBUF_NAMESPACE_ID::uint64 val = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
+          if (PROTOBUF_PREDICT_TRUE(::Payload_PayloadFlag_IsValid(val))) {
+            _internal_set_flag(static_cast<::Payload_PayloadFlag>(val));
+          } else {
+            ::PROTOBUF_NAMESPACE_ID::internal::WriteVarint(4, val, mutable_unknown_fields());
+          }
         } else goto handle_unusual;
         continue;
-      // optional string extra = 4;
-      case 4:
-        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 34)) {
+      // optional string extra = 5;
+      case 5:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 42)) {
           auto str = _internal_mutable_extra();
           ptr = ::PROTOBUF_NAMESPACE_ID::internal::InlineGreedyStringParser(str, ptr, ctx);
           #ifndef NDEBUG
           ::PROTOBUF_NAMESPACE_ID::internal::VerifyUTF8(str, "Payload.extra");
           #endif  // !NDEBUG
+          CHK_(ptr);
+        } else goto handle_unusual;
+        continue;
+      // optional int32 code = 6;
+      case 6:
+        if (PROTOBUF_PREDICT_TRUE(static_cast<::PROTOBUF_NAMESPACE_ID::uint8>(tag) == 48)) {
+          _Internal::set_has_code(&has_bits);
+          code_ = ::PROTOBUF_NAMESPACE_ID::internal::ReadVarint64(&ptr);
           CHK_(ptr);
         } else goto handle_unusual;
         continue;
@@ -279,34 +357,47 @@ failure:
         1, this->_internal_sender(), target);
   }
 
-  // optional string message = 2;
+  // optional string ip = 2;
   if (cached_has_bits & 0x00000002u) {
+    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
+      this->_internal_ip().data(), static_cast<int>(this->_internal_ip().length()),
+      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
+      "Payload.ip");
+    target = stream->WriteStringMaybeAliased(
+        2, this->_internal_ip(), target);
+  }
+
+  // optional string message = 3;
+  if (cached_has_bits & 0x00000004u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_message().data(), static_cast<int>(this->_internal_message().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Payload.message");
     target = stream->WriteStringMaybeAliased(
-        2, this->_internal_message(), target);
+        3, this->_internal_message(), target);
   }
 
-  // optional string flag = 3;
-  if (cached_has_bits & 0x00000004u) {
-    ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
-      this->_internal_flag().data(), static_cast<int>(this->_internal_flag().length()),
-      ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
-      "Payload.flag");
-    target = stream->WriteStringMaybeAliased(
-        3, this->_internal_flag(), target);
+  // optional .Payload.PayloadFlag flag = 4;
+  if (cached_has_bits & 0x00000010u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteEnumToArray(
+      4, this->_internal_flag(), target);
   }
 
-  // optional string extra = 4;
+  // optional string extra = 5;
   if (cached_has_bits & 0x00000008u) {
     ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::VerifyUTF8StringNamedField(
       this->_internal_extra().data(), static_cast<int>(this->_internal_extra().length()),
       ::PROTOBUF_NAMESPACE_ID::internal::WireFormat::SERIALIZE,
       "Payload.extra");
     target = stream->WriteStringMaybeAliased(
-        4, this->_internal_extra(), target);
+        5, this->_internal_extra(), target);
+  }
+
+  // optional int32 code = 6;
+  if (cached_has_bits & 0x00000020u) {
+    target = stream->EnsureSpace(target);
+    target = ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::WriteInt32ToArray(6, this->_internal_code(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -326,7 +417,7 @@ size_t Payload::ByteSizeLong() const {
   (void) cached_has_bits;
 
   cached_has_bits = _has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000003fu) {
     // optional string sender = 1;
     if (cached_has_bits & 0x00000001u) {
       total_size += 1 +
@@ -334,25 +425,38 @@ size_t Payload::ByteSizeLong() const {
           this->_internal_sender());
     }
 
-    // optional string message = 2;
+    // optional string ip = 2;
     if (cached_has_bits & 0x00000002u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
+          this->_internal_ip());
+    }
+
+    // optional string message = 3;
+    if (cached_has_bits & 0x00000004u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_message());
     }
 
-    // optional string flag = 3;
-    if (cached_has_bits & 0x00000004u) {
-      total_size += 1 +
-        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
-          this->_internal_flag());
-    }
-
-    // optional string extra = 4;
+    // optional string extra = 5;
     if (cached_has_bits & 0x00000008u) {
       total_size += 1 +
         ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::StringSize(
           this->_internal_extra());
+    }
+
+    // optional .Payload.PayloadFlag flag = 4;
+    if (cached_has_bits & 0x00000010u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::EnumSize(this->_internal_flag());
+    }
+
+    // optional int32 code = 6;
+    if (cached_has_bits & 0x00000020u) {
+      total_size += 1 +
+        ::PROTOBUF_NAMESPACE_ID::internal::WireFormatLite::Int32Size(
+          this->_internal_code());
     }
 
   }
@@ -388,19 +492,26 @@ void Payload::MergeFrom(const Payload& from) {
   (void) cached_has_bits;
 
   cached_has_bits = from._has_bits_[0];
-  if (cached_has_bits & 0x0000000fu) {
+  if (cached_has_bits & 0x0000003fu) {
     if (cached_has_bits & 0x00000001u) {
       _internal_set_sender(from._internal_sender());
     }
     if (cached_has_bits & 0x00000002u) {
-      _internal_set_message(from._internal_message());
+      _internal_set_ip(from._internal_ip());
     }
     if (cached_has_bits & 0x00000004u) {
-      _internal_set_flag(from._internal_flag());
+      _internal_set_message(from._internal_message());
     }
     if (cached_has_bits & 0x00000008u) {
       _internal_set_extra(from._internal_extra());
     }
+    if (cached_has_bits & 0x00000010u) {
+      flag_ = from.flag_;
+    }
+    if (cached_has_bits & 0x00000020u) {
+      code_ = from.code_;
+    }
+    _has_bits_[0] |= cached_has_bits;
   }
 }
 
@@ -427,9 +538,15 @@ void Payload::InternalSwap(Payload* other) {
   _internal_metadata_.Swap<::PROTOBUF_NAMESPACE_ID::UnknownFieldSet>(&other->_internal_metadata_);
   swap(_has_bits_[0], other->_has_bits_[0]);
   sender_.Swap(&other->sender_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ip_.Swap(&other->ip_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   message_.Swap(&other->message_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
-  flag_.Swap(&other->flag_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
   extra_.Swap(&other->extra_, &::PROTOBUF_NAMESPACE_ID::internal::GetEmptyStringAlreadyInited(), GetArena());
+  ::PROTOBUF_NAMESPACE_ID::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(Payload, code_)
+      + sizeof(Payload::code_)
+      - PROTOBUF_FIELD_OFFSET(Payload, flag_)>(
+          reinterpret_cast<char*>(&flag_),
+          reinterpret_cast<char*>(&other->flag_));
 }
 
 ::PROTOBUF_NAMESPACE_ID::Metadata Payload::GetMetadata() const {

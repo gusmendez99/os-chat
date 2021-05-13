@@ -13,7 +13,7 @@ public:
   UserStatus status;
   string ip_address; // unique
   int socket;
-
   string to_string();
+  string get_status();
   
 };
