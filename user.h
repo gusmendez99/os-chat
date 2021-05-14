@@ -5,7 +5,12 @@
 
 using namespace std;
 
-enum UserStatus { ACTIVE, BUSY, INACTIVE };
+enum UserStatus
+{
+  ACTIVE,
+  BUSY,
+  INACTIVE
+};
 
 class User
 {
@@ -18,5 +23,4 @@ public:
   string to_string();
   string get_status();
   void set_status(string new_status);
-  
 };

@@ -1,5 +1,5 @@
 #include <iostream>
-#include <stdio.h> 
+#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -23,18 +23,17 @@
 using namespace std;
 
 pthread_t thread_pool[MAX_CLIENTS];
-void * retvals[MAX_CLIENTS];
+void *retvals[MAX_CLIENTS];
 
-map<string, User*> users = {};
+map<string, User *> users = {};
 
 void error(const char *msg)
 {
-	perror(msg);
-	exit(1);
+    perror(msg);
+    exit(1);
 }
 
-
-void send_response(int socket, string sender, string message, int code, char* buffer)
+void send_response(int socket, string sender, string message, int code, char *buffer)
 {
     string binary;
     Payload *response = new Payload();
@@ -61,11 +60,10 @@ void send_error(int socket, string message)
     strcpy(buffer, binary.c_str());
     int sent = send(socket, buffer, sizeof buffer, 0);
     if (sent == 0)
-	{
-		fprintf(stderr, "ERROR sending response to current client\n");
-	}
+    {
+        fprintf(stderr, "ERROR sending response to current client\n");
+    }
 }
-
 
 void *handle_client_connected(void *params)
 {
@@ -82,19 +80,22 @@ void *handle_client_connected(void *params)
         int received = recv(own_socket, buffer, BUFFER_SIZE, 0);
         if (received > 0)
         {
-            if (*buffer == '#') {
-				printf("SERVER - Lost connection with the client %s...\n", current_user.username);
-			} else {
-                // Handle Proto Options                
+            if (*buffer == '#')
+            {
+                printf("SERVER - Lost connection with the client %s...\n", current_user.username);
+            }
+            else
+            {
+                // Handle Proto Options
                 payload.ParseFromString(buffer);
-            
+
                 // USER REGISTER
                 if (payload.flag() == Payload_PayloadFlag_register_)
                 {
                     printf("New server registration request with username: %s\n", new_user->username);
 
                     if (users.count(payload.sender()) == 0)
-                    {   
+                    {
                         string response_message = "User registered successfully";
                         send_response(own_socket, DEFAULT_SENDER, response_message, HTTP_OK, buffer);
                         printf("User %s entered to chat\n", new_user->username);
@@ -106,14 +107,13 @@ void *handle_client_connected(void *params)
 
                         strcpy(current_user.ip_address, new_user->ip_address);
                         users[current_user.username] = &current_user;
-                    } 
-                    else 
+                    }
+                    else
                     {
                         send_error(own_socket, "Username has already been taken");
                     }
-
                 }
-                
+
                 // CONNECTED USERS
                 else if (payload.flag() == Payload_PayloadFlag_user_list)
                 {
@@ -121,27 +121,27 @@ void *handle_client_connected(void *params)
 
                     Payload *response = new Payload();
                     string response_message = "\tUSERNAME\tIP\tESTADO\n";
-                    map<string, User*>::iterator itr;
+                    map<string, User *>::iterator itr;
 
-                    for (itr = users.begin(); itr != users.end(); ++itr) { 
-                        User* u = itr->second;
-                        response_message = response_message + u->to_string() + "\n";        
+                    for (itr = users.begin(); itr != users.end(); ++itr)
+                    {
+                        User *u = itr->second;
+                        response_message = response_message + u->to_string() + "\n";
                     }
                     send_response(own_socket, DEFAULT_SENDER, response_message, HTTP_OK, buffer);
                 }
-                
+
                 // USER INFO
                 else if (payload.flag() == Payload_PayloadFlag_user_info)
                 {
                     if (users.count(payload.extra()) > 0)
                     {
-                        printf("Retrieving info of user '%s', action performed by user: %s\n", payload.extra(), new_user->username);                    
+                        printf("Retrieving info of user '%s', action performed by user: %s\n", payload.extra(), new_user->username);
                         string response_message = "\tUSERNAME\tIP\tESTADO\n";
                         User *user_retrieved = users[payload.extra()];
-                        
+
                         response_message = response_message + user_retrieved->to_string() + "\n";
                         send_response(own_socket, DEFAULT_SENDER, response_message, HTTP_OK, buffer);
-
                     }
                     else
                     {
@@ -149,7 +149,7 @@ void *handle_client_connected(void *params)
                         send_error(own_socket, "User does not exists on server");
                     }
                 }
-                
+
                 // CHANGE USER STATUS
                 else if (payload.flag() == Payload_PayloadFlag_update_status)
                 {
@@ -159,7 +159,7 @@ void *handle_client_connected(void *params)
                     string response_message = "Status updated to " + current_user.get_status();
                     send_response(own_socket, DEFAULT_SENDER, response_message, HTTP_OK, buffer);
                 }
-                
+
                 // BROADCAST
                 else if (payload.flag() == Payload_PayloadFlag_general_chat)
                 {
@@ -170,38 +170,38 @@ void *handle_client_connected(void *params)
                     // Real broadcast message
                     Payload *broadcast = new Payload();
                     broadcast->set_sender(DEFAULT_SENDER);
-                    broadcast->set_message("BM (" + payload.sender()+"): " + payload.message() + "\n");
+                    broadcast->set_message("BM (" + payload.sender() + "): " + payload.message() + "\n");
                     broadcast->set_code(HTTP_OK);
-                    
+
                     string binary;
                     broadcast->SerializeToString(&binary);
                     strcpy(buffer, binary.c_str());
 
-                    map<string, User*>::iterator itr;
-                    for (itr = users.begin(); itr != users.end(); ++itr) { 
-                        User* u = itr->second;
-                        send(u->socket, buffer, binary.size() + 1, 0);        
+                    map<string, User *>::iterator itr;
+                    for (itr = users.begin(); itr != users.end(); ++itr)
+                    {
+                        User *u = itr->second;
+                        send(u->socket, buffer, binary.size() + 1, 0);
                     }
                 }
-                
+
                 // PRIVATE MESSAGE
                 else if (payload.flag() == Payload_PayloadFlag_private_chat)
                 {
                     if (users.count(payload.extra()) > 0)
                     {
                         printf("Private message received from user: %s, to: %s\n", new_user->username, payload.extra());
-                                                
+
                         string response_message = "Private message was sent successfully to: " + payload.extra();
                         send_response(own_socket, DEFAULT_SENDER, response_message, HTTP_OK, buffer);
 
-
-                        User* recipient = users[payload.extra()];
+                        User *recipient = users[payload.extra()];
                         // Real private message
                         Payload *private_msg = new Payload();
                         private_msg->set_sender(current_user.username);
-                        private_msg->set_message("PM (" + payload.sender()+"): " + payload.message() + "\n");
+                        private_msg->set_message("PM (" + payload.sender() + "): " + payload.message() + "\n");
                         private_msg->set_code(HTTP_OK);
-                        
+
                         string binary;
                         private_msg->SerializeToString(&binary);
                         strcpy(buffer, binary.c_str());
@@ -232,10 +232,11 @@ void *handle_client_connected(void *params)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-		printf("Usage: %s <port>\n", argv[0]);
-		exit(1);
-	}
+    if (argc != 2)
+    {
+        printf("Usage: %s <port>\n", argv[0]);
+        exit(1);
+    }
 
     int port = atoi(argv[1]);
 
@@ -274,7 +275,7 @@ int main(int argc, char *argv[])
     {
         client_size = sizeof client_addr;
         conn_fd = accept(socket_fd, (struct sockaddr *)&client_addr, &client_size);
-        
+
         // TODO: Manage a limited number of clients connected...
         User new_user;
         new_user.socket = conn_fd;

@@ -13,7 +13,7 @@ User::User()
 	status = ACTIVE;
 }
 
-string User::to_string() 
+string User::to_string()
 {
 	string data;
 	data = "\t" + username + "\t" + ip_address + "\t" + User::get_status();
@@ -22,20 +22,20 @@ string User::to_string()
 
 string User::get_status()
 {
-	if(status==ACTIVE)
+	if (status == ACTIVE)
 		return "Activo";
-	else if (status==BUSY)
-	 	return "Ocupado";
+	else if (status == BUSY)
+		return "Ocupado";
 	else
-	 	return "Inactivo";
+		return "Inactivo";
 }
 
 void User::set_status(string new_status)
 {
-	if(strcmp(new_status.c_str(), "Activo") == 0)
+	if (strcmp(new_status.c_str(), "Activo") == 0)
 		status = ACTIVE;
 	else if (strcmp(new_status.c_str(), "Ocupado") == 0)
-	 	status = BUSY;
+		status = BUSY;
 	else
-	 	status = INACTIVE;
+		status = INACTIVE;
 }
