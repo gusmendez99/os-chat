@@ -21,98 +21,102 @@
 #define IP "127.0.0.1"
 #define DELAY 30000
 #define BUFFER_SIZE 4096
+#define CONNECTED 1
+#define DISCONNECTED 0
 
 using namespace std;
 using namespace google::protobuf;
 
 map<string, vector<UserMessage *>> private_messages;
-bool has_server_response, has_blocked_gui_interaction, is_connected;
+bool has_server_response, has_blocked_gui_interaction;
+int connected;
 queue<std::string> messages_queue;
 
 // Ncurses Config
-void make_line(WINDOW *w,int x, int y)
+void make_line(WINDOW *window,int x, int y)
 {
     start_color();
-    init_pair(1, COLOR_BLACK, COLOR_GREEN);
+    init_pair(1, COLOR_BLACK, COLOR_CYAN);
     attron(COLOR_PAIR(1));
 
-    wmove(w, y, 0);
-    whline(w,' ', x);
+    wmove(window, y, 0);
+    whline(window,' ', x);
 
     attroff(COLOR_PAIR(1));
-    wmove(w, y+1, 0);
+    wmove(window, y+1, 0);
 }
 
-void make_main_menu(int option)
+void make_main_menu(char* username, int option)
 {
-    mvprintw(0, 0,"Main Menu");
+    mvprintw(0, 0, "### WELCOME TO THE CHAT ###");
+    mvprintw(1, 0, username);
 
     if(option==1)
         {
 
             attron(COLOR_PAIR(1));
-            mvprintw(2, 0,"Show is_connected users");
+            mvprintw(3, 0,"Show connected users");
             attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(3, 0,"Change status");
-            mvprintw(4, 0,"Send broadcast message");
-            mvprintw(5, 0,"Send private message");
-            mvprintw(6, 0,"Help");
-            mvprintw(7, 0,"Exit");
+            mvprintw(4, 0,"Change status");
+            mvprintw(5, 0,"Send broadcast message");
+            mvprintw(6, 0,"Send private message");
+            mvprintw(7, 0,"Help");
+            mvprintw(8, 0,"Exit");
 
         }
         else if(option==2)
         {
-            mvprintw(2, 0,"Show is_connected users");
+            mvprintw(3, 0,"Show connected users");
             attron(COLOR_PAIR(1));
-            mvprintw(3, 0,"Change status");
+            mvprintw(4, 0,"Change status");
             attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(4, 0,"Send broadcast message");
-            mvprintw(5, 0,"Send private message");
-            mvprintw(6, 0,"Help");
-            mvprintw(7, 0,"Exit");
+            mvprintw(5, 0,"Send broadcast message");
+            mvprintw(6, 0,"Send private message");
+            mvprintw(7, 0,"Help");
+            mvprintw(8, 0,"Exit");
         }
         else if(option==3)
         {
-            mvprintw(2, 0,"Show is_connected users");
-            mvprintw(3, 0,"Change status");
+            mvprintw(3, 0,"Show connected users");
+            mvprintw(4, 0,"Change status");
             attron(COLOR_PAIR(1));
-            mvprintw(4, 0,"Send broadcast message");
+            mvprintw(5, 0,"Send broadcast message");
             attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(5, 0,"Send private message");
-            mvprintw(6, 0,"Help");
-            mvprintw(7, 0,"Exit");
+            mvprintw(6, 0,"Send private message");
+            mvprintw(7, 0,"Help");
+            mvprintw(8, 0,"Exit");
         }
         else if(option==4)
         {
-            mvprintw(2, 0,"Show is_connected users");
-            mvprintw(3, 0,"Change status");
-            mvprintw(4, 0,"Send broadcast message");
+            mvprintw(3, 0,"Show connected users");
+            mvprintw(4, 0,"Change status");
+            mvprintw(5, 0,"Send broadcast message");
             attron(COLOR_PAIR(1));
-            mvprintw(5, 0,"Send private message");
+            mvprintw(6, 0,"Send private message");
             attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(6, 0,"Help");
-            mvprintw(7, 0,"Exit");
+            mvprintw(7, 0,"Help");
+            mvprintw(8, 0,"Exit");
         }
         else if(option==5)
         {
-            mvprintw(2, 0,"Show is_connected users");
-            mvprintw(3, 0,"Change status");
-            mvprintw(4, 0,"Send broadcast message");
-            mvprintw(5, 0,"Send private message");
+            mvprintw(3, 0,"Show connected users");
+            mvprintw(4, 0,"Change status");
+            mvprintw(5, 0,"Send broadcast message");
+            mvprintw(6, 0,"Send private message");
             attron(COLOR_PAIR(1));
-            mvprintw(6, 0,"Help");
+            mvprintw(7, 0,"Help");
             attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(7, 0,"Exit");
+            mvprintw(8, 0,"Exit");
         }
         else if(option==6)
         {
-            mvprintw(2, 0,"Show is_connected users");
-            mvprintw(3, 0,"Change status");
-            mvprintw(4, 0,"Send broadcast message");
-            mvprintw(5, 0,"Send private message");
-            mvprintw(6, 0,"Help");
+            mvprintw(3, 0,"Show connected users");
+            mvprintw(4, 0,"Change status");
+            mvprintw(5, 0,"Send broadcast message");
+            mvprintw(6, 0,"Send private message");
+            mvprintw(7, 0,"Help");
             attron(COLOR_PAIR(1));
-            mvprintw(7, 0,"Exit");
+            mvprintw(8, 0,"Exit");
             attroff(COLOR_PAIR(1));//se apaga el color
         }
         
@@ -163,14 +167,14 @@ void print_help()
 
     mvprintw(6, 0,  "MENU OPTIONS:");
     
-    mvprintw(8, 0,  "Show is_connected users:");
+    mvprintw(8, 0,  "Show connected users:");
     mvprintw(9, 0,  "The information of the users who are registered in the server is displayed, to see extra information, select a user.");
 
     mvprintw(12, 0,  "Change status:");
     mvprintw(13, 0,  "This option allows you to change the status of the user (Active, Busy, Inactive).");
 
     mvprintw(16, 0,  "Broadcast message:");
-    mvprintw(17, 0,  "Chat with all is_connected users.");
+    mvprintw(17, 0,  "Chat with all connected users.");
 
     mvprintw(19, 0,  "Private message:");
     mvprintw(20, 0,  "Private chat with a single user.");    
@@ -203,7 +207,7 @@ void *listen(void *args){
 		}
 
 		has_server_response = false;
-		if (!is_connected) pthread_exit(0);
+		if (connected == 0) pthread_exit(0);
 	}
 }
 
@@ -305,7 +309,7 @@ int main(int argc, char *argv[])
 		printf("ERROR: SERVER RESPONSE WAS: %s\n", server_message.c_str());
         return EXIT_FAILURE;
     }
-	is_connected = true;
+	connected = CONNECTED;
 
 	pthread_t client_thread_id;
 	pthread_attr_t attrs;
@@ -315,10 +319,359 @@ int main(int argc, char *argv[])
 
     printf("Finally connected...\n");
 
-	
+	// Manage menu of Ncurses
+    char input_buffer[100] = {0}, *s = input_buffer;
+    int entered_key;
+    int screen_number=1, main_menu_option=1, position_status_change=0;
+    string error_message;
+    WINDOW *window;
+ 
+    if ((window = initscr()) == NULL) {
+        fprintf(stderr, "Error: initscr()\n");
+        exit(EXIT_FAILURE);
+    }
+
+    // Allow special keys
+    keypad(stdscr, TRUE); 
+    // disable auto echo
+    noecho();
+    // disable line-buffering
+    cbreak();      
+    // wait 100 milliseconds for input
+    timeout(100);  
+    
+    // TODO: Update connected users before 'while'
+
+    while (connected != DISCONNECTED) {
+        erase();
+
+        int x,y;
+        getmaxyx(stdscr,y,x);
+
+        if(screen_number==1)
+        {
+            // Main Menu
+            error_message="";
+            start_color();
+            init_pair(1, COLOR_BLACK, COLOR_CYAN);
+
+            make_main_menu(username, main_menu_option);        
+           
+            refresh();
+            if ((entered_key = getch()) != ERR) 
+            {
+                if (entered_key == 27) {
+                    //If user press [ESC]
+                    connected=DISCONNECTED;
+                }
+                else if(entered_key==KEY_UP)
+                {
+                    if(main_menu_option--<=1) main_menu_option=6;
+
+                }
+                else if(entered_key==KEY_DOWN)
+                {
+                    if(main_menu_option++>=6) main_menu_option=1;
+                    
+                }
+                else if (entered_key=='\n') 
+                {
+                    if(main_menu_option==1)
+                    {
+                        main_menu_option=1;
+                        screen_number=9;
+                        
+                    }
+                    else if(main_menu_option==2)
+                    {
+                        main_menu_option=1;
+                        screen_number=7;
+                    }
+                    else if(main_menu_option==3)
+                    {
+                        main_menu_option=1;
+                        screen_number=2;
+                    }
+                    else if(main_menu_option==4)
+                    {
+                        main_menu_option=1;
+                        screen_number=5;
+                    }
+                    else if(main_menu_option==5)
+                    {
+                        main_menu_option=1;
+                        screen_number=8;
+                    }
+                    else if(main_menu_option==6) connected=DISCONNECTED;;
+                }
+
+            }
+
+
+
+        }
+        else if(screen_number==2)
+        {
+            mvprintw(0, 0,"--- Broadcast Messages ---");
+
+            if(error_message!="")
+            {
+                char error_message_char[error_message.size() + 1];
+                strcpy(error_message_char, error_message.c_str());
+                mvprintw(y-1, 0,"%s",error_message_char);
+            }
+
+
+            
+            make_line(window,x,y-5);
+            mvprintw(y-4, 0, "> %s", buffer);
+
+            refresh();
+             
+            // getch (with cbreak and timeout as above)
+            // waits 100ms and returns ERR if it doesn't read anything.
+            if ((entered_key = getch()) != ERR) {
+                if (entered_key == '\n') {
+                    //If user press [ENTER]                    
+
+                    *s = 0;
+                    sscanf(buffer, "%d", &connected);
+                    s = buffer;
+                    *s = 0;
+                }
+                else if (entered_key == 27) {
+                    //If user press [ESC]
+                    screen_number=1;
+                    *s = 0;
+                    sscanf(buffer, "%d", &connected);
+                    s = buffer;
+                    *s = 0;
+                }
+                else if (entered_key == KEY_BACKSPACE) {
+                    if (s > buffer)
+                        *--s = 0;
+                }
+                else if (s - buffer < (long)sizeof buffer - 1) {
+                    *s++ = entered_key;
+                    *s = 0;
+                }
+            }
+
+        }
+        else if(screen_number==5)
+        {
+            mvprintw(0, 0,"--- Private Messages ---");
+
+            if(error_message!="")
+            {
+                char error_message_char[error_message.size() + 1];
+                strcpy(error_message_char, error_message.c_str());
+                mvprintw(y-1, 0,"ERR: %s",error_message_char);
+            }
+
+            refresh();
+
+            if ((entered_key = getch()) != ERR) 
+            {
+                if (entered_key == 27) {
+                    //If user press [ESC]
+                    screen_number=1;
+                }
+                else if(entered_key==KEY_UP)
+                {
+                    
+
+                }
+                else if(entered_key==KEY_DOWN)
+                {
+                    
+                    
+                }
+                else if (entered_key=='\n') 
+                {
+                    screen_number=6;
+                   
+                }
+
+            }
+        }
+        else if(screen_number==6)
+        {
+            // Private chat
+            
+            mvprintw(y-4, 0, "> %s", buffer);
+            refresh();
+
+
+
+            if ((entered_key = getch()) != ERR) {
+                if (entered_key == '\n') {
+                    //If user press [ENTER]
+                    
+                    *s = 0;
+                    sscanf(buffer, "%d", &connected);
+                    s = buffer;
+                    *s = 0;
+                }
+                else if (entered_key == 27) {
+                    //If user press [ESC]
+                    screen_number=5;
+                    *s = 0;
+                    sscanf(buffer, "%d", &connected);
+                    s = buffer;
+                    *s = 0;
+                }
+                else if (entered_key == KEY_BACKSPACE) {
+                    if (s > buffer)
+                        *--s = 0;
+                }
+                else if (s - buffer < (long)sizeof buffer - 1) {
+                    *s++ = entered_key;
+                    *s = 0;
+                }
+            }
+
+        }
+        else if(screen_number==7)
+        {
+            // Change Status
+            print_status_options(position_status_change);
+
+            if(error_message!="")
+            {
+                char error_message_char[error_message.size() + 1];
+                strcpy(error_message_char, error_message.c_str());
+                mvprintw(y-1, 0,"ERR: %s",error_message_char);
+            }
+            
+            refresh();
+
+            if ((entered_key = getch()) != ERR) {
+                if (entered_key == '\n') {
+                    //If user press [ENTER] 
+                    // TODO: change status
+                    screen_number=1;
+                    position_status_change=0;
+
+                    *s = 0;
+                    sscanf(buffer, "%d", &connected);
+                    s = buffer;
+                    *s = 0;
+                }
+                else if (entered_key == 27) {
+                    //If user press [ESC]
+                    screen_number=1;
+                    *s = 0;
+                    sscanf(buffer, "%d", &connected);
+                    s = buffer;
+                    *s = 0;
+                }
+                else if(entered_key==KEY_UP)
+                {
+                    if(position_status_change--<=0) position_status_change=2;
+
+                }
+                else if(entered_key==KEY_DOWN)
+                {
+                    if(position_status_change++>=2) position_status_change=0;
+                    
+                }
+                else if (entered_key == KEY_BACKSPACE) {
+                    if (s > buffer)
+                        *--s = 0;
+                }
+                else if (s - buffer < (long)sizeof buffer - 1) {
+                    *s++ = entered_key;
+                    *s = 0;
+                }
+            }
+
+        }
+        else if(screen_number==8)
+        {
+            print_help();
+            refresh();
+            // Help
+            if ((entered_key = getch()) != ERR) 
+            {
+                if (entered_key == 27) {
+                    //If user press [ESC]
+                    screen_number=1;
+                    *s = 0;
+                    sscanf(buffer, "%d", &connected);
+                    s = buffer;
+                    *s = 0;
+                }
+            }
+        
+
+        }
+        else if(screen_number==9)
+        {
+            //Connected Users
+
+            if(error_message!="")
+            {
+                char error_message_char[error_message.size() + 1];
+                strcpy(error_message_char, error_message.c_str());
+                mvprintw(y-1, 0,"ERR: %s",error_message_char);
+            }
+
+            refresh();
+            if ((entered_key = getch()) != ERR) 
+            {
+                if (entered_key == 27) {
+                    //If user press [ESC]
+                    screen_number=1;
+                }
+                else if(entered_key==KEY_UP)
+                {
+                    
+
+                }
+                else if(entered_key==KEY_DOWN)
+                {
+                                        
+                }
+                else if (entered_key=='\n') 
+                {
+                    screen_number=10;
+                    
+                }
+
+            }
+        }
+        else if(screen_number==10)
+        {
+            mvprintw(0, 0,"--- User Info ---");
+            // printInfoDeUsuario();
+
+            if(error_message!="")
+            {
+                char error_message_char[error_message.size() + 1];
+                strcpy(error_message_char, error_message.c_str());
+                mvprintw(y-1, 0,"ERR: %s",error_message_char);
+            }
+
+            refresh();
+
+            if ((entered_key = getch()) != ERR) 
+            {
+                if (entered_key == 27) {
+                    //If user press [ESC]
+                    screen_number=1;
+                }
+            }
+        }
+        usleep(DELAY);
+    }
+ 
+    delwin(window);
+    endwin();
+
 	// Close connection
 	pthread_cancel(client_thread_id);
-	is_connected = 0;
+	connected = DISCONNECTED;
 	close(socket_fd);
 	return EXIT_SUCCESS;
 }
