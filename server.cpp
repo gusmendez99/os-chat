@@ -34,12 +34,20 @@ void activity_check() {
         string str_id = itr->first;
         User *u = itr->second;
 
-        if(difftime(server_time, u->last_activity) > MAX_INACTIVE_TIME && u->status != BUSY) {
-            users[str_id]->set_status("INACTIVE");
+        if(difftime(server_time, u->last_activity) > MAX_INACTIVE_TIME && u->status != BUSY ) {
+            u->set_status("INACTIVO");
+            printf("Setting to INACTIVE status user %s expiration time reached\n", u->username.c_str());
         }
 
-        if(difftime(server_time, u->last_activity) < MAX_INACTIVE_TIME && u->status != BUSY) {
-            users[str_id]->set_status("ACTIVE");
+        // if(difftime(server_time, u->last_activity) < MAX_INACTIVE_TIME ) {
+        //     u->set_status("ACTIVO");
+        //     printf("Checked: %s ACTIVE status user\n", u->username.c_str());
+
+        // }
+        if(difftime(server_time, u->last_activity) < MAX_INACTIVE_TIME && u->status != ACTIVE) {
+            u->set_status("ACTIVO");
+            printf("Setting to ACTIVE status user: %s activity detected\n", u->username.c_str());
+
         }
     }
 }
@@ -63,7 +71,7 @@ void send_response(int socket, string sender, string message, Payload_PayloadFla
 
     strcpy(buffer, binary.c_str());
     send(socket, buffer, binary.size() + 1, 0);
-    printf("SENDING RESPONSE TO %s...", response->sender().c_str());
+    printf("SENDING RESPONSE TO %s...\n", response->sender().c_str());
 }
 
 void send_error(int socket, string message)
@@ -90,6 +98,7 @@ void *handle_client_connected(void *params)
     User current_user;
     User *new_user = (User *)params;
     int own_socket = new_user->socket;
+    User theUser = *new_user;
 
     // Received payload
     Payload payload;
@@ -111,7 +120,7 @@ void *handle_client_connected(void *params)
                 // USER REGISTER
                 if (payload.flag() == Payload_PayloadFlag_register_)
                 {
-                    printf("New server registration request with username: %s\n", new_user->username.c_str());
+                    printf("New server registration request with username: %s\n",payload.sender().c_str());
 
                     if (users.count(payload.sender()) == 0)
                     {
@@ -124,7 +133,7 @@ void *handle_client_connected(void *params)
                         current_user.username = payload.sender();
                         current_user.socket = own_socket;
                         current_user.status = ACTIVE;
-                        current_user.last_activity = time(&curr_time);
+                        current_user.update_last_activity_time();
 
                         strcpy(current_user.ip_address, new_user->ip_address);
                         users[current_user.username] = &current_user;
@@ -138,9 +147,10 @@ void *handle_client_connected(void *params)
                 // CONNECTED USERS
                 else if (payload.flag() == Payload_PayloadFlag_user_list)
                 {
-                    printf("Listing all users for user: %s\n", new_user->username.c_str());
+                    printf("Listing all users for user: %s\n", current_user.username.c_str());
 
-                    new_user->update_last_activity_time(); 
+                    current_user.update_last_activity_time();
+
                     Payload *response = new Payload();
                     string response_message = "\tUSERNAME\tIP\tESTADO\n";
                     map<string, User *>::iterator itr;
@@ -151,15 +161,19 @@ void *handle_client_connected(void *params)
                         response_message = response_message + u->to_string() + "\n";
                     }
                     send_response(own_socket, DEFAULT_SENDER, response_message, payload.flag(), HTTP_OK, buffer);
+                
+                    activity_check();
+
                 }
 
                 // USER INFO
                 else if (payload.flag() == Payload_PayloadFlag_user_info)
                 {
+
                     if (users.count(payload.extra()) > 0)
                     {
-                        new_user->update_last_activity_time();
-                        printf("Retrieving info of user '%s', action performed by user: %s\n", payload.extra().c_str(), new_user->username.c_str());
+                        current_user.update_last_activity_time();
+                        printf("Retrieving info of user '%s', action performed by user: %s\n", payload.extra().c_str(), current_user.username.c_str());
                         string response_message = "\tUSERNAME\tIP\tESTADO\n";
                         User *user_retrieved = users[payload.extra()];
 
@@ -171,24 +185,30 @@ void *handle_client_connected(void *params)
                         printf("User does not exists on server");
                         send_error(own_socket, "User does not exists on server");
                     }
+
+                    activity_check();
+
                 }
 
                 // CHANGE USER STATUS
                 else if (payload.flag() == Payload_PayloadFlag_update_status)
                 {
-                    printf("Status change request for user: %s (%s)\n", new_user->username.c_str(), payload.extra().c_str());
-                    new_user->update_last_activity_time();
+                    printf("Status change request for user: %s (%s)\n", current_user.username.c_str(), payload.extra().c_str());
+                    current_user.update_last_activity_time();
                     current_user.set_status(payload.extra()); 
 
                     string response_message = "Status updated to " + current_user.get_status();
                     send_response(own_socket, DEFAULT_SENDER, response_message, payload.flag(), HTTP_OK, buffer);
+                    
+                    activity_check();
+
                 }
 
                 // BROADCAST
                 else if (payload.flag() == Payload_PayloadFlag_general_chat)
                 {
-                    printf("Broadcast message received from user: %s\n", new_user->username.c_str());
-                    new_user->update_last_activity_time();
+                    printf("Broadcast message received from user: %s\n", current_user.username.c_str());
+                    current_user.update_last_activity_time();
                     string response_message = "Broadcast message was sent successfully";
                     send_response(own_socket, DEFAULT_SENDER, response_message, payload.flag(), HTTP_OK, buffer);
 
@@ -210,16 +230,18 @@ void *handle_client_connected(void *params)
                         if (u->username != new_user->username)
                             send(u->socket, buffer, binary.size() + 1, 0);
                     }
+                    activity_check();
+
                 }
 
                 // PRIVATE MESSAGE
                 else if (payload.flag() == Payload_PayloadFlag_private_chat)
                 {
-                    new_user->update_last_activity_time();
+                    current_user.update_last_activity_time();
 
                     if (users.count(payload.extra()) > 0)
                     {
-                        printf("Private message received from user: %s, to: %s\n", new_user->username.c_str(), payload.extra().c_str());
+                        printf("Private message received from user: %s, to: %s\n", current_user.username.c_str(), payload.extra().c_str());
                         string response_message = "Private message was sent successfully to: " + payload.extra();
                         send_response(own_socket, DEFAULT_SENDER, response_message, payload.flag(), HTTP_OK, buffer);
 
@@ -240,6 +262,7 @@ void *handle_client_connected(void *params)
                         printf("User for PM does not exists on server");
                         send_error(own_socket, "User for PM does not exists on server");
                     }
+                    activity_check();
 
                 }
 
@@ -250,6 +273,7 @@ void *handle_client_connected(void *params)
                 }
             }
         }
+
     }
 
     // Disconnnect user from socket
