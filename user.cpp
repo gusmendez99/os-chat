@@ -6,6 +6,8 @@
 
 using namespace std;
 
+string universal_compatible_status[]={"ACTIVO","OCUPADO","INACTIVO"};
+
 User::User()
 {
 	username = "";
@@ -23,18 +25,18 @@ string User::to_string()
 string User::get_status()
 {
 	if (status == ACTIVE)
-		return "Activo";
+		return universal_compatible_status[0];
 	else if (status == BUSY)
-		return "Ocupado";
+		return universal_compatible_status[1];
 	else
-		return "Inactivo";
+		return universal_compatible_status[2];
 }
 
 void User::set_status(string new_status)
 {
-	if (strcmp(new_status.c_str(), "Activo") == 0)
+	if (strcmp(new_status.c_str(), universal_compatible_status[0].c_str()) == 0)
 		status = ACTIVE;
-	else if (strcmp(new_status.c_str(), "Ocupado") == 0)
+	else if (strcmp(new_status.c_str(), universal_compatible_status[1].c_str()) == 0)
 		status = BUSY;
 	else
 		status = INACTIVE;

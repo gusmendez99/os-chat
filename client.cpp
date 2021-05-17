@@ -13,26 +13,31 @@
 #include <ifaddrs.h>
 #include <map>
 #include <vector>
-#include <algorithm>
-#include <queue>
 #include "payload.pb.h"
 #include "user_message.h"
 
 #define IP "127.0.0.1"
-#define DELAY 30000
+#define DELAY 50
 #define BUFFER_SIZE 4096
 #define CONNECTED 1
 #define DISCONNECTED 0
+#define BROADCAST_SENDER "broadcast"
+#define PRIVATE_SENDER "private"
 
 using namespace std;
 using namespace google::protobuf;
 
-map<string, vector<UserMessage *>> private_messages;
-bool has_server_response, has_blocked_gui_interaction;
+map<string, vector<string>> inbox_messages;
+string universal_compatible_status[]={"ACTIVO","OCUPADO","INACTIVO"};
 int connected;
-queue<std::string> messages_queue;
+bool has_server_response;
+string current_server_message;
+string current_error_message;
 
-// Ncurses Config
+/****************************************
+*           Ncurses Config
+****************************************/
+
 void make_line(WINDOW *window,int x, int y)
 {
     start_color();
@@ -124,7 +129,6 @@ void make_main_menu(char* username, int option)
 }
 
 
-
 void print_status_options(int position)
 {
     mvprintw(0, 0,"Status change");
@@ -132,57 +136,137 @@ void print_status_options(int position)
     if(position==0)
     {
         attron(COLOR_PAIR(1));
-        mvprintw(2, 0,"Active"); 
+        mvprintw(2, 0, universal_compatible_status[0].c_str()); 
         attroff(COLOR_PAIR(1));
-        mvprintw(3, 0,"Busy"); 
-        mvprintw(4, 0,"Inactive");
+        mvprintw(3, 0, universal_compatible_status[1].c_str()); 
+        mvprintw(4, 0, universal_compatible_status[2].c_str());
     }
     else if(position==1)
     {
-        mvprintw(2, 0,"Active"); 
+        mvprintw(2, 0, universal_compatible_status[0].c_str()); 
         attron(COLOR_PAIR(1));
-        mvprintw(3, 0,"Busy"); 
+        mvprintw(3, 0, universal_compatible_status[1].c_str()); 
         attroff(COLOR_PAIR(1));
-        mvprintw(4, 0,"Inactive");
+        mvprintw(4, 0, universal_compatible_status[2].c_str());
     }
     else if(position==2)
     {
-        mvprintw(2, 0,"Active"); 
-        mvprintw(3, 0,"Busy"); 
+        mvprintw(2, 0, universal_compatible_status[0].c_str()); 
+        mvprintw(3, 0, universal_compatible_status[1].c_str()); 
         attron(COLOR_PAIR(1));
-        mvprintw(4, 0,"Inactive");
+        mvprintw(4, 0, universal_compatible_status[2].c_str());
         attroff(COLOR_PAIR(1));
     }
-
-      
 
 }
 
 void print_help()
 {
     mvprintw(0, 0,"Help");
-
     mvprintw(2, 0,  "--------------------------------------------");
     mvprintw(3, 0,  "To navigate you use the keyboard arrows, to select an option you use the Enter key and return you use the ESC key.");
-
     mvprintw(6, 0,  "MENU OPTIONS:");
-    
     mvprintw(8, 0,  "Show connected users:");
     mvprintw(9, 0,  "The information of the users who are registered in the server is displayed, to see extra information, select a user.");
-
     mvprintw(12, 0,  "Change status:");
     mvprintw(13, 0,  "This option allows you to change the status of the user (Active, Busy, Inactive).");
-
     mvprintw(16, 0,  "Broadcast message:");
     mvprintw(17, 0,  "Chat with all connected users.");
-
     mvprintw(19, 0,  "Private message:");
     mvprintw(20, 0,  "Private chat with a single user.");    
 }
 
 
+/****************************************
+*               GUI Utils
+****************************************/
+
+
+string get_chat_name(int position)
+{
+    int idx = 0;
+    map<string,vector<string>>::iterator iter;
+    vector<string> chat;
+
+    for (iter=inbox_messages.begin(); iter != inbox_messages.end(); iter++)
+    {
+        if(idx++==position) return(iter->first);
+    }
+}
+
+void add_new_inbox_message(string username, string init_message)
+{
+    if(inbox_messages.find(username) == inbox_messages.end()) {
+        // Not found, create new element
+        vector<string> vect; 
+        vect.push_back(init_message);
+        inbox_messages[username]=vect;
+    } 
+    else 
+    {
+        // Found
+        inbox_messages[username].push_back(init_message);
+    }
+    
+}
+
+void print_inbox_chat(int max, int init_screen_position, bool show_broadcast = false)
+{
+    int idx=0;
+    vector<string> chat;
+
+    if (show_broadcast) {
+        if(inbox_messages.find(BROADCAST_SENDER) == inbox_messages.end()) {
+            // Not found, create new element
+            vector<string> vect; 
+            inbox_messages[BROADCAST_SENDER]=vect;
+        } 
+        chat = inbox_messages.at(BROADCAST_SENDER);
+    } else {
+        if(inbox_messages.find(PRIVATE_SENDER) == inbox_messages.end()) {
+            // Not found, create new element
+            vector<string> vect; 
+            inbox_messages[PRIVATE_SENDER]=vect;
+        } 
+        chat = inbox_messages.at(PRIVATE_SENDER);
+    }
+
+
+    if(!chat.empty())
+    {
+        // If you want to add seen & unseen feature to your messages
+        // chat[chat.size()-1]->seen = 1;
+
+        int fix = (chat.size() - max);
+        if(fix < 0) fix = 0;
+        idx=0;
+
+        mvprintw(1, 0, "Chats: %d", chat.size());
+        for (int i=(0 + fix); i < chat.size(); i++) 
+        {
+            string final_message = chat[i];
+
+            char dest[final_message.size() + 1];
+            strcpy(dest, final_message.c_str());
+            mvprintw(init_screen_position + (idx++), 0, "%s", dest);
+        }
+    }
+}
+
+
+
+/****************************************
+*               Chat & Threads
+****************************************/
+
 void *listen(void *args){
-    while (1)
+    // Classmates private message pattern
+    // Classmates broadcast message pattern
+    const string classmates_broadcast_pattern[2] = {"Mensaje general de ", "(general):"};
+    const string classmates_private_pattern[2] = {"Mensaje privado de ", "(private):"};
+
+
+    while (true)
 	{
 		char buffer[BUFFER_SIZE];
 		int received_message = recv(*(int *)args, buffer, BUFFER_SIZE, 0);
@@ -191,24 +275,83 @@ void *listen(void *args){
 		payload.ParseFromString(buffer);
         string message = payload.message();
 
-
-		if (payload.code() != 500 || payload.code() != 200) {
-            cout << "SERVER ERROR WHILE LISTENING SERVER..." << endl;
-        }
-		
-        if (payload.code() == 500){
+        if (payload.code() == 500)
+        {
 			cout << "SERVER ERROR: " << message << endl;
+            has_server_response = true;
+            current_error_message = message;
+            break;
 		}
 
-		while (!has_blocked_gui_interaction && !messages_queue.empty())
-		{
-			printf("%s\n", messages_queue.front().c_str());
-			messages_queue.pop();
-		}
+        if (payload.code() == 200) 
+        {
+            
+            // MESSAGES PURPOSE 
 
-		has_server_response = false;
+            // Omit server logs, just add general/private message if message has this pattern:
+            /*
+                @ricardoVA999:  "Mensaje general de " for broadcast
+                                "Mensaje privado de " for private
+                @aeaa1998:      "(general):"
+                                (private): 
+            */
+
+            // Broadcast Messages
+            if(payload.flag() == Payload_PayloadFlag_general_chat) {
+                //Omit broadcast that just have Server Log Info (not a real broadcast message)
+                bool is_real_broadcast = false;
+                for (int i = 0; i < 2; i++) 
+                {
+                    if (message.find(classmates_broadcast_pattern[i]) != string::npos) {
+                        is_real_broadcast = true;
+                    } 
+                }
+                
+                if (is_real_broadcast) add_new_inbox_message(BROADCAST_SENDER, message);
+            }
+            // Private Messages
+            else if (payload.flag() == Payload_PayloadFlag_private_chat) {
+                //Omit private message that just have Server Log Info (not a real private message)
+                bool is_real_private = false;
+                for (int i = 0; i < 2; i++) 
+                {
+                    if (message.find(classmates_private_pattern[i]) != string::npos)
+                    {
+                        is_real_private = true;
+                    }
+                }
+                
+                if (is_real_private) add_new_inbox_message(PRIVATE_SENDER, message);
+            }
+
+            has_server_response = true;
+            current_server_message = message;
+        } else 
+        {
+            cout << "FATAL ERROR WHILE LISTENING SERVER..." << endl;
+            break;
+        }
+
+
 		if (connected == 0) pthread_exit(0);
 	}
+}
+
+void send_message_to_server(string username, string ip, Payload_PayloadFlag flag, string message, string extra, char *buffer, int socket)   
+{
+    string message_serialized;
+    Payload *request_payload = new Payload();
+	request_payload->set_sender(username);
+	request_payload->set_flag(flag);
+    if (extra != NULL && extra != "") request_payload->set_extra(extra);
+    if (message != NULL && message != "") request_payload->set_message(message);
+	request_payload->set_ip(ip);
+
+	request_payload->SerializeToString(&message_serialized);
+
+	strcpy(buffer, message_serialized.c_str());
+	send(socket, buffer, message_serialized.size() + 1, 0);
+	has_server_response = false;
 }
 
 
@@ -221,7 +364,7 @@ int main(int argc, char *argv[])
     */
     int socket_fd, err;
 	struct addrinfo hints = {}, *addrs, *addr;
-	char host_ip[INET_ADDRSTRLEN];
+	char server_ip[INET_ADDRSTRLEN];
 	char buffer[BUFFER_SIZE];
 	char *username, *server, *port;
     
@@ -275,26 +418,26 @@ int main(int argc, char *argv[])
 
 	if (addr == NULL)
 	{
-		printf("ERROR ON GET HOST IP\n");
+		printf("ERROR ON GET SERVER IP\n");
 		return EXIT_FAILURE;
 	}
 
 	inet_ntop(
         addr->ai_family, 
         &((struct sockaddr_in *) addr->ai_addr)->sin_addr, 
-        host_ip, 
-        sizeof host_ip
+        server_ip, 
+        sizeof server_ip
     );
 	freeaddrinfo(addrs);
 
-	printf("STARTING HANDSHAKE WITH OWN IP: %s\n", host_ip);
+	printf("STARTING HANDSHAKE WITH SERVER IP: %s\n", server_ip);
     // Server handshake
     string message_serialized;
     Payload *handshake_payload = new Payload;
 
 	handshake_payload->set_sender(username);
 	handshake_payload->set_flag(Payload_PayloadFlag_register_);
-	handshake_payload->set_ip(host_ip);
+	handshake_payload->set_ip(server_ip);
 	handshake_payload->SerializeToString(&message_serialized);
 
 	strcpy(buffer, message_serialized.c_str());
@@ -323,7 +466,6 @@ int main(int argc, char *argv[])
     char input_buffer[100] = {0}, *s = input_buffer;
     int entered_key;
     int screen_number=1, main_menu_option=1, position_status_change=0;
-    string error_message;
     WINDOW *window;
  
     if ((window = initscr()) == NULL) {
@@ -337,11 +479,10 @@ int main(int argc, char *argv[])
     noecho();
     // disable line-buffering
     cbreak();      
-    // wait 100 milliseconds for input
-    timeout(100);  
+    // wait DELAY milliseconds for input
+    timeout(DELAY);  
     
-    // TODO: Update connected users before 'while'
-
+    bool sent_request;
     while (connected != DISCONNECTED) {
         erase();
 
@@ -351,7 +492,10 @@ int main(int argc, char *argv[])
         if(screen_number==1)
         {
             // Main Menu
-            error_message="";
+            current_error_message = "";
+            current_server_message = "";
+            sent_request = false;
+
             start_color();
             init_pair(1, COLOR_BLACK, COLOR_CYAN);
 
@@ -413,18 +557,19 @@ int main(int argc, char *argv[])
         else if(screen_number==2)
         {
             mvprintw(0, 0,"--- Broadcast Messages ---");
-
-            if(error_message!="")
+            sent_request = false;
+             
+            if(current_error_message!="")
             {
-                char error_message_char[error_message.size() + 1];
-                strcpy(error_message_char, error_message.c_str());
-                mvprintw(y-1, 0,"%s",error_message_char);
+                char error_message_char[current_error_message.size() + 1];
+                strcpy(error_message_char, current_error_message.c_str());
+                mvprintw(y-1, 0,"%s", error_message_char);
             }
 
-
+            print_inbox_chat(y-7, 2, true);
             
-            make_line(window,x,y-5);
-            mvprintw(y-4, 0, "> %s", buffer);
+            make_line(window, x, y-5);
+            mvprintw(y-4, 0, "> %s", input_buffer);
 
             refresh();
              
@@ -432,26 +577,36 @@ int main(int argc, char *argv[])
             // waits 100ms and returns ERR if it doesn't read anything.
             if ((entered_key = getch()) != ERR) {
                 if (entered_key == '\n') {
-                    //If user press [ENTER]                    
+                    //If user press [ENTER]
+                    if(strlen(input_buffer) > 0) 
+                    {
+                        if (!sent_request) {
+                            send_message_to_server(username, server_ip, Payload_PayloadFlag_general_chat,
+                                string(input_buffer), "", buffer, socket_fd);
+                            add_new_inbox_message(BROADCAST_SENDER, "(Me) " + string(input_buffer));
+                            sent_request = true;
+                        }
+                    }
+
 
                     *s = 0;
-                    sscanf(buffer, "%d", &connected);
-                    s = buffer;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
                     *s = 0;
                 }
                 else if (entered_key == 27) {
                     //If user press [ESC]
                     screen_number=1;
                     *s = 0;
-                    sscanf(buffer, "%d", &connected);
-                    s = buffer;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
                     *s = 0;
                 }
                 else if (entered_key == KEY_BACKSPACE) {
-                    if (s > buffer)
+                    if (s > input_buffer)
                         *--s = 0;
                 }
-                else if (s - buffer < (long)sizeof buffer - 1) {
+                else if (s - input_buffer < (long)sizeof input_buffer - 1) {
                     *s++ = entered_key;
                     *s = 0;
                 }
@@ -462,10 +617,10 @@ int main(int argc, char *argv[])
         {
             mvprintw(0, 0,"--- Private Messages ---");
 
-            if(error_message!="")
+            if(current_error_message!="")
             {
-                char error_message_char[error_message.size() + 1];
-                strcpy(error_message_char, error_message.c_str());
+                char error_message_char[current_error_message.size() + 1];
+                strcpy(error_message_char, current_error_message.c_str());
                 mvprintw(y-1, 0,"ERR: %s",error_message_char);
             }
 
@@ -499,7 +654,7 @@ int main(int argc, char *argv[])
         {
             // Private chat
             
-            mvprintw(y-4, 0, "> %s", buffer);
+            mvprintw(y-4, 0, "> %s", input_buffer);
             refresh();
 
 
@@ -509,23 +664,23 @@ int main(int argc, char *argv[])
                     //If user press [ENTER]
                     
                     *s = 0;
-                    sscanf(buffer, "%d", &connected);
-                    s = buffer;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
                     *s = 0;
                 }
                 else if (entered_key == 27) {
                     //If user press [ESC]
                     screen_number=5;
                     *s = 0;
-                    sscanf(buffer, "%d", &connected);
-                    s = buffer;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
                     *s = 0;
                 }
                 else if (entered_key == KEY_BACKSPACE) {
-                    if (s > buffer)
+                    if (s > input_buffer)
                         *--s = 0;
                 }
-                else if (s - buffer < (long)sizeof buffer - 1) {
+                else if (s - input_buffer < (long)sizeof input_buffer - 1) {
                     *s++ = entered_key;
                     *s = 0;
                 }
@@ -537,10 +692,10 @@ int main(int argc, char *argv[])
             // Change Status
             print_status_options(position_status_change);
 
-            if(error_message!="")
+            if(current_error_message!="")
             {
-                char error_message_char[error_message.size() + 1];
-                strcpy(error_message_char, error_message.c_str());
+                char error_message_char[current_error_message.size() + 1];
+                strcpy(error_message_char, current_error_message.c_str());
                 mvprintw(y-1, 0,"ERR: %s",error_message_char);
             }
             
@@ -550,20 +705,25 @@ int main(int argc, char *argv[])
                 if (entered_key == '\n') {
                     //If user press [ENTER] 
                     // TODO: change status
+                    if (!sent_request) {
+                        send_message_to_server(username, server_ip, Payload_PayloadFlag_update_status, 
+                            "", universal_compatible_status[position_status_change], buffer, socket_fd);
+                        sent_request = true;
+                    }
                     screen_number=1;
                     position_status_change=0;
 
                     *s = 0;
-                    sscanf(buffer, "%d", &connected);
-                    s = buffer;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
                     *s = 0;
                 }
                 else if (entered_key == 27) {
                     //If user press [ESC]
                     screen_number=1;
                     *s = 0;
-                    sscanf(buffer, "%d", &connected);
-                    s = buffer;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
                     *s = 0;
                 }
                 else if(entered_key==KEY_UP)
@@ -577,10 +737,10 @@ int main(int argc, char *argv[])
                     
                 }
                 else if (entered_key == KEY_BACKSPACE) {
-                    if (s > buffer)
+                    if (s > input_buffer)
                         *--s = 0;
                 }
-                else if (s - buffer < (long)sizeof buffer - 1) {
+                else if (s - input_buffer < (long)sizeof input_buffer - 1) {
                     *s++ = entered_key;
                     *s = 0;
                 }
@@ -598,8 +758,8 @@ int main(int argc, char *argv[])
                     //If user press [ESC]
                     screen_number=1;
                     *s = 0;
-                    sscanf(buffer, "%d", &connected);
-                    s = buffer;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
                     *s = 0;
                 }
             }
@@ -608,14 +768,22 @@ int main(int argc, char *argv[])
         }
         else if(screen_number==9)
         {
+            if (!sent_request) {
+                send_message_to_server(username, server_ip, Payload_PayloadFlag_user_list, 
+                    "", "", buffer, socket_fd);
+                sent_request = true;
+            }
             //Connected Users
+            mvprintw(0, 0,"--- Connected Users ---");
+            mvprintw(1, 0, "%s", current_server_message.c_str());
 
-            if(error_message!="")
+            if(current_error_message!="")
             {
-                char error_message_char[error_message.size() + 1];
-                strcpy(error_message_char, error_message.c_str());
+                char error_message_char[current_error_message.size() + 1];
+                strcpy(error_message_char, current_error_message.c_str());
                 mvprintw(y-1, 0,"ERR: %s",error_message_char);
             }
+
 
             refresh();
             if ((entered_key = getch()) != ERR) 
@@ -624,32 +792,18 @@ int main(int argc, char *argv[])
                     //If user press [ESC]
                     screen_number=1;
                 }
-                else if(entered_key==KEY_UP)
-                {
-                    
-
-                }
-                else if(entered_key==KEY_DOWN)
-                {
-                                        
-                }
-                else if (entered_key=='\n') 
-                {
-                    screen_number=10;
-                    
-                }
 
             }
         }
         else if(screen_number==10)
         {
             mvprintw(0, 0,"--- User Info ---");
-            // printInfoDeUsuario();
+            // Print user info here (basically, the server message...);
 
-            if(error_message!="")
+            if(current_error_message!="")
             {
-                char error_message_char[error_message.size() + 1];
-                strcpy(error_message_char, error_message.c_str());
+                char error_message_char[current_error_message.size() + 1];
+                strcpy(error_message_char, current_error_message.c_str());
                 mvprintw(y-1, 0,"ERR: %s",error_message_char);
             }
 

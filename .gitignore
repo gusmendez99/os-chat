@@ -45,3 +45,8 @@
 *.exe
 *.out
 *.app
+
+
+# Compiled files
+client
+server
