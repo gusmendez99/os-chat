@@ -1,6 +1,8 @@
 # Chat
 Project 1 - OS
 
+![demo](https://github.com/gusmendez99/os-chat/raw/main/images/demo.gif?raw=true)
+
 ### Install
 
 Please, be sure to install before Ncurses and Protobuf in your environment.
@@ -16,5 +18,5 @@ make
 
 #### Client
 ```shell
-./client <username> <server-ip> <server-port> <user-ip>
+./client <username> <server-ip> <server-port>
 ```  
