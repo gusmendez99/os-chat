@@ -14,7 +14,8 @@
 #include <map>
 #include <vector>
 #include "payload.pb.h"
-#include "user_message.h"
+#include "user.h"
+#include <time.h>
 
 #define IP "127.0.0.1"
 #define DELAY 50

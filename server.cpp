@@ -12,16 +12,37 @@
 #include <sys/socket.h>
 #include "user.h"
 #include "payload.pb.h"
+#include <time.h>
 
 #define BUFFER_SIZE 4096
 #define DEFAULT_SENDER "Server"
 #define HTTP_OK 200
 #define HTTP_INTERNAL_ERROR 500
+#define MAX_INACTIVE_TIME 30 //sec
 
 using namespace std;
 
 const char* default_ip = "127.0.0.1";
 map<string, User *> users = {};
+
+void activity_check() {
+    time_t server_time;
+    time(&server_time);
+    
+    map<string, User *>::iterator itr;
+    for(itr = users.begin(); itr != users.end(); ++itr) {
+        string str_id = itr->first;
+        User *u = itr->second;
+
+        if(difftime(server_time, u->last_activity) > MAX_INACTIVE_TIME && u->status != BUSY) {
+            users[str_id]->set_status("INACTIVE");
+        }
+
+        if(difftime(server_time, u->last_activity) < MAX_INACTIVE_TIME && u->status != BUSY) {
+            users[str_id]->set_status("ACTIVE");
+        }
+    }
+}
 
 void error(const char *msg)
 {
@@ -99,9 +120,11 @@ void *handle_client_connected(void *params)
                         printf("User %s entered to chat\n", new_user->username.c_str());
 
                         // Guardar informacion de nuevo cliente
+                        time_t curr_time;
                         current_user.username = payload.sender();
                         current_user.socket = own_socket;
                         current_user.status = ACTIVE;
+                        current_user.last_activity = time(&curr_time);
 
                         strcpy(current_user.ip_address, new_user->ip_address);
                         users[current_user.username] = &current_user;
@@ -117,6 +140,7 @@ void *handle_client_connected(void *params)
                 {
                     printf("Listing all users for user: %s\n", new_user->username.c_str());
 
+                    new_user->update_last_activity_time(); 
                     Payload *response = new Payload();
                     string response_message = "\tUSERNAME\tIP\tESTADO\n";
                     map<string, User *>::iterator itr;
@@ -134,6 +158,7 @@ void *handle_client_connected(void *params)
                 {
                     if (users.count(payload.extra()) > 0)
                     {
+                        new_user->update_last_activity_time();
                         printf("Retrieving info of user '%s', action performed by user: %s\n", payload.extra().c_str(), new_user->username.c_str());
                         string response_message = "\tUSERNAME\tIP\tESTADO\n";
                         User *user_retrieved = users[payload.extra()];
@@ -152,6 +177,7 @@ void *handle_client_connected(void *params)
                 else if (payload.flag() == Payload_PayloadFlag_update_status)
                 {
                     printf("Status change request for user: %s (%s)\n", new_user->username.c_str(), payload.extra().c_str());
+                    new_user->update_last_activity_time();
                     current_user.set_status(payload.extra()); 
 
                     string response_message = "Status updated to " + current_user.get_status();
@@ -162,6 +188,7 @@ void *handle_client_connected(void *params)
                 else if (payload.flag() == Payload_PayloadFlag_general_chat)
                 {
                     printf("Broadcast message received from user: %s\n", new_user->username.c_str());
+                    new_user->update_last_activity_time();
                     string response_message = "Broadcast message was sent successfully";
                     send_response(own_socket, DEFAULT_SENDER, response_message, payload.flag(), HTTP_OK, buffer);
 
@@ -188,10 +215,11 @@ void *handle_client_connected(void *params)
                 // PRIVATE MESSAGE
                 else if (payload.flag() == Payload_PayloadFlag_private_chat)
                 {
+                    new_user->update_last_activity_time();
+
                     if (users.count(payload.extra()) > 0)
                     {
                         printf("Private message received from user: %s, to: %s\n", new_user->username.c_str(), payload.extra().c_str());
-
                         string response_message = "Private message was sent successfully to: " + payload.extra();
                         send_response(own_socket, DEFAULT_SENDER, response_message, payload.flag(), HTTP_OK, buffer);
 
@@ -212,6 +240,7 @@ void *handle_client_connected(void *params)
                         printf("User for PM does not exists on server");
                         send_error(own_socket, "User for PM does not exists on server");
                     }
+
                 }
 
                 // OPTION ERROR
@@ -237,6 +266,7 @@ int main(int argc, char *argv[])
         printf("Usage: %s <port>\n", argv[0]);
         exit(1);
     }
+
 
     int port = atoi(argv[1]);
 
