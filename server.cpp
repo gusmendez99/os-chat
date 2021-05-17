@@ -44,9 +44,9 @@ void activity_check() {
         //     printf("Checked: %s ACTIVE status user\n", u->username.c_str());
 
         // }
-        if(difftime(server_time, u->last_activity) < MAX_INACTIVE_TIME && u->status != ACTIVE) {
+        if(difftime(server_time, u->last_activity) < MAX_INACTIVE_TIME && u->status != BUSY) {
             u->set_status("ACTIVO");
-            printf("Setting to ACTIVE status user: %s activity detected\n", u->username.c_str());
+            printf("Updating to ACTIVE status user: %s activity detected\n", u->username.c_str());
 
         }
     }
