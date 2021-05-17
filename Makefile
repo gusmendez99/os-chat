@@ -8,4 +8,4 @@ client: client.cpp payload.pb.cc
 	g++ -o client client.cpp payload.pb.cc -lprotobuf -lncurses -pthread
 
 payload.proto:
-	protoc -I=. --cpp_out=. payload.protoc
+	protoc -I=. --cpp_out=. payload.proto

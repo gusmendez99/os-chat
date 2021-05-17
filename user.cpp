@@ -41,3 +41,7 @@ void User::set_status(string new_status)
 	else
 		status = INACTIVE;
 }
+
+void User::update_last_activity_time() {
+	time(&last_activity);
+}
