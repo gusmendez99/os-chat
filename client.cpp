@@ -61,71 +61,87 @@ void make_main_menu(char* username, int option)
 
             attron(COLOR_PAIR(1));
             mvprintw(3, 0,"Show connected users");
-            attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(4, 0,"Change status");
-            mvprintw(5, 0,"Send broadcast message");
-            mvprintw(6, 0,"Send private message");
-            mvprintw(7, 0,"Help");
-            mvprintw(8, 0,"Exit");
+            attroff(COLOR_PAIR(1));
+            mvprintw(4, 0,"Show user info");
+            mvprintw(5, 0,"Change status");
+            mvprintw(6, 0,"Send broadcast message");
+            mvprintw(7, 0,"Send private message");
+            mvprintw(8, 0,"Help");
+            mvprintw(9, 0,"Exit");
 
         }
         else if(option==2)
         {
             mvprintw(3, 0,"Show connected users");
             attron(COLOR_PAIR(1));
-            mvprintw(4, 0,"Change status");
-            attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(5, 0,"Send broadcast message");
-            mvprintw(6, 0,"Send private message");
-            mvprintw(7, 0,"Help");
-            mvprintw(8, 0,"Exit");
+            mvprintw(4, 0,"Show user info");
+            attroff(COLOR_PAIR(1));
+            mvprintw(5, 0,"Change status");
+            mvprintw(6, 0,"Send broadcast message");
+            mvprintw(7, 0,"Send private message");
+            mvprintw(8, 0,"Help");
+            mvprintw(9, 0,"Exit");
         }
         else if(option==3)
         {
             mvprintw(3, 0,"Show connected users");
-            mvprintw(4, 0,"Change status");
+            mvprintw(4, 0,"Show user info");
             attron(COLOR_PAIR(1));
-            mvprintw(5, 0,"Send broadcast message");
-            attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(6, 0,"Send private message");
-            mvprintw(7, 0,"Help");
-            mvprintw(8, 0,"Exit");
+            mvprintw(5, 0,"Change status");
+            attroff(COLOR_PAIR(1));
+            mvprintw(6, 0,"Send broadcast message");
+            mvprintw(7, 0,"Send private message");
+            mvprintw(8, 0,"Help");
+            mvprintw(9, 0,"Exit");
         }
         else if(option==4)
         {
             mvprintw(3, 0,"Show connected users");
-            mvprintw(4, 0,"Change status");
-            mvprintw(5, 0,"Send broadcast message");
+            mvprintw(4, 0,"Show user info");
+            mvprintw(5, 0,"Change status");
             attron(COLOR_PAIR(1));
-            mvprintw(6, 0,"Send private message");
-            attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(7, 0,"Help");
-            mvprintw(8, 0,"Exit");
+            mvprintw(6, 0,"Send broadcast message");
+            attroff(COLOR_PAIR(1));
+            mvprintw(7, 0,"Send private message");
+            mvprintw(8, 0,"Help");
+            mvprintw(9, 0,"Exit");
         }
         else if(option==5)
         {
             mvprintw(3, 0,"Show connected users");
-            mvprintw(4, 0,"Change status");
-            mvprintw(5, 0,"Send broadcast message");
-            mvprintw(6, 0,"Send private message");
+            mvprintw(4, 0,"Show user info");
+            mvprintw(5, 0,"Change status");
+            mvprintw(6, 0,"Send broadcast message");
             attron(COLOR_PAIR(1));
-            mvprintw(7, 0,"Help");
-            attroff(COLOR_PAIR(1));//se apaga el color
-            mvprintw(8, 0,"Exit");
+            mvprintw(7, 0,"Send private message");
+            attroff(COLOR_PAIR(1));
+            mvprintw(8, 0,"Help");
+            mvprintw(9, 0,"Exit");
         }
         else if(option==6)
         {
             mvprintw(3, 0,"Show connected users");
-            mvprintw(4, 0,"Change status");
-            mvprintw(5, 0,"Send broadcast message");
-            mvprintw(6, 0,"Send private message");
-            mvprintw(7, 0,"Help");
+            mvprintw(4, 0,"Show user info");
+            mvprintw(5, 0,"Change status");
+            mvprintw(6, 0,"Send broadcast message");
+            mvprintw(7, 0,"Send private message");
             attron(COLOR_PAIR(1));
-            mvprintw(8, 0,"Exit");
-            attroff(COLOR_PAIR(1));//se apaga el color
+            mvprintw(8, 0,"Help");
+            attroff(COLOR_PAIR(1));
+            mvprintw(9, 0,"Exit");
         }
-        
-
+        else if(option==7)
+        {
+            mvprintw(3, 0,"Show connected users");
+            mvprintw(4, 0,"Show user info");
+            mvprintw(5, 0,"Change status");
+            mvprintw(6, 0,"Send broadcast message");
+            mvprintw(7, 0,"Send private message");
+            mvprintw(8, 0,"Help");
+            attron(COLOR_PAIR(1));
+            mvprintw(9, 0,"Exit");
+            attroff(COLOR_PAIR(1));
+        }
 }
 
 
@@ -165,15 +181,27 @@ void print_help()
     mvprintw(0, 0,"Help");
     mvprintw(2, 0,  "--------------------------------------------");
     mvprintw(3, 0,  "To navigate you use the keyboard arrows, to select an option you use the Enter key and return you use the ESC key.");
+
+
     mvprintw(6, 0,  "MENU OPTIONS:");
+
     mvprintw(8, 0,  "Show connected users:");
     mvprintw(9, 0,  "The information of the users who are registered in the server is displayed, to see extra information, select a user.");
-    mvprintw(12, 0,  "Change status:");
-    mvprintw(13, 0,  "This option allows you to change the status of the user (Active, Busy, Inactive).");
-    mvprintw(16, 0,  "Broadcast message:");
-    mvprintw(17, 0,  "Chat with all connected users.");
-    mvprintw(19, 0,  "Private message:");
-    mvprintw(20, 0,  "Private chat with a single user.");    
+
+
+    mvprintw(12, 0,  "Show user info:");
+    mvprintw(13, 0,  "This option allows you to show user info based on their usernames");
+
+
+    mvprintw(16, 0,  "Change status:");
+    mvprintw(17, 0,  "This option allows you to change the status of the user (Active, Busy, Inactive).");
+
+
+    mvprintw(20, 0,  "Broadcast message:");
+    mvprintw(21, 0,  "Chat with all connected users.");
+
+    mvprintw(23, 0,  "Private message:");
+    mvprintw(24, 0,  "Private chat with a single user.");    
 }
 
 
@@ -277,7 +305,6 @@ void *listen(void *args){
 
         if (payload.code() == 500)
         {
-			cout << "SERVER ERROR: " << message << endl;
             has_server_response = true;
             current_error_message = message;
             break;
@@ -327,9 +354,11 @@ void *listen(void *args){
 
             has_server_response = true;
             current_server_message = message;
+            current_error_message = "";
         } else 
         {
             cout << "FATAL ERROR WHILE LISTENING SERVER..." << endl;
+            current_error_message = "FATAL ERROR WHILE LISTENING SERVER...";
             break;
         }
 
@@ -373,7 +402,7 @@ int main(int argc, char *argv[])
 
 	if (argc != 4)
 	{
-		printf("Usage: %s <username> <server_ip> <port>\n", argv[0]);
+		printf("Usage: %s <username> <server-ip> <port>\n", argv[0]);
 		return EXIT_FAILURE;
 	}
 
@@ -514,12 +543,12 @@ int main(int argc, char *argv[])
                 }
                 else if(entered_key==KEY_UP)
                 {
-                    if(main_menu_option--<=1) main_menu_option=6;
+                    if(main_menu_option--<=1) main_menu_option=7;
 
                 }
                 else if(entered_key==KEY_DOWN)
                 {
-                    if(main_menu_option++>=6) main_menu_option=1;
+                    if(main_menu_option++>=7) main_menu_option=1;
                     
                 }
                 else if (entered_key=='\n') 
@@ -533,30 +562,32 @@ int main(int argc, char *argv[])
                     else if(main_menu_option==2)
                     {
                         main_menu_option=1;
-                        screen_number=7;
+                        screen_number=10;
                     }
                     else if(main_menu_option==3)
                     {
                         main_menu_option=1;
-                        screen_number=2;
+                        screen_number=7;
                     }
                     else if(main_menu_option==4)
                     {
                         main_menu_option=1;
-                        screen_number=5;
+                        screen_number=2;
                     }
                     else if(main_menu_option==5)
                     {
                         main_menu_option=1;
+                        screen_number=5;
+                    }
+                    else if(main_menu_option==6)
+                    {
+                        main_menu_option=1;
                         screen_number=8;
                     }
-                    else if(main_menu_option==6) connected=DISCONNECTED;;
+                    else if(main_menu_option==7) connected=DISCONNECTED;
                 }
 
             }
-
-
-
         }
         else if(screen_number==2)
         {
@@ -834,8 +865,11 @@ int main(int argc, char *argv[])
         }
         else if(screen_number==10)
         {
-            mvprintw(0, 0,"--- User Info ---");
+            mvprintw(0, 0,"--- Show User Info ---");
+            sent_request = false;
+
             // Print user info here (basically, the server message...);
+            mvprintw(1, 0, "%s", current_server_message.c_str());
 
             if(current_error_message!="")
             {
@@ -844,13 +878,44 @@ int main(int argc, char *argv[])
                 mvprintw(y-1, 0,"ERR: %s",error_message_char);
             }
 
+            mvprintw(y-4, 0, "Enter username to search> %s", input_buffer);
             refresh();
 
             if ((entered_key = getch()) != ERR) 
             {
-                if (entered_key == 27) {
+                if (entered_key == '\n') {
+                    //If user press [ENTER]
+
+                    if(strlen(input_buffer) > 0) 
+                    {
+                        if (!sent_request) {
+                            send_message_to_server(username, server_ip, Payload_PayloadFlag_user_info,
+                                "", string(input_buffer), buffer, socket_fd);
+                            sent_request = true;
+                        }
+                    }
+
+
+                    *s = 0;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
+                    *s = 0;
+                }
+                else if (entered_key == 27) {
                     //If user press [ESC]
                     screen_number=1;
+                    *s = 0;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
+                    *s = 0;
+                }
+                else if (entered_key == KEY_BACKSPACE) {
+                    if (s > input_buffer)
+                        *--s = 0;
+                }
+                else if (s - input_buffer < (long)sizeof input_buffer - 1) {
+                    *s++ = entered_key;
+                    *s = 0;
                 }
             }
         }

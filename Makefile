@@ -1,4 +1,4 @@
-all: server client
+all: payload.proto server client
 
 server: server.cpp payload.pb.cc
 	g++ -o server server.cpp payload.pb.cc user.cpp -lpthread -lprotobuf

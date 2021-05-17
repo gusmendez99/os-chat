@@ -50,3 +50,6 @@
 # Compiled files
 client
 server
+
+payload.pb.cc
+payload.pb.h
