@@ -302,7 +302,8 @@ void *listen(void *args){
                 bool is_real_broadcast = false;
                 for (int i = 0; i < 2; i++) 
                 {
-                    if (message.find(classmates_broadcast_pattern[i]) != string::npos) {
+                    if (message.find(classmates_broadcast_pattern[i]) != string::npos) 
+                    {
                         is_real_broadcast = true;
                     } 
                 }
@@ -466,6 +467,7 @@ int main(int argc, char *argv[])
     char input_buffer[100] = {0}, *s = input_buffer;
     int entered_key;
     int screen_number=1, main_menu_option=1, position_status_change=0;
+    string temporal_private_recipient, temporal_private_message;
     WINDOW *window;
  
     if ((window = initscr()) == NULL) {
@@ -494,6 +496,8 @@ int main(int argc, char *argv[])
             // Main Menu
             current_error_message = "";
             current_server_message = "";
+            temporal_private_recipient = "";
+            temporal_private_message = "";
             sent_request = false;
 
             start_color();
@@ -556,7 +560,7 @@ int main(int argc, char *argv[])
         }
         else if(screen_number==2)
         {
-            mvprintw(0, 0,"--- Broadcast Messages ---");
+            mvprintw(0, 0,"--- All Broadcast Messages ---");
             sent_request = false;
              
             if(current_error_message!="")
@@ -615,54 +619,87 @@ int main(int argc, char *argv[])
         }
         else if(screen_number==5)
         {
-            mvprintw(0, 0,"--- Private Messages ---");
-
+            mvprintw(0, 0,"--- All Private Messages ---");
+            temporal_private_recipient = "";
+             
             if(current_error_message!="")
             {
                 char error_message_char[current_error_message.size() + 1];
                 strcpy(error_message_char, current_error_message.c_str());
-                mvprintw(y-1, 0,"ERR: %s",error_message_char);
+                mvprintw(y-1, 0,"%s", error_message_char);
             }
 
-            refresh();
+            print_inbox_chat(y-7, 2, false);
+            
+            make_line(window, x, y-5);
+            mvprintw(y-4, 0, "New Message To > %s", input_buffer);
 
-            if ((entered_key = getch()) != ERR) 
-            {
-                if (entered_key == 27) {
+            refresh();
+             
+            // getch (with cbreak and timeout as above)
+            // waits 100ms and returns ERR if it doesn't read anything.
+            if ((entered_key = getch()) != ERR) {
+                if (entered_key == '\n') {
+                    //If user press [ENTER]
+                    // Set message recipient
+                    if(strlen(input_buffer) > 0) {
+                        screen_number = 6;
+                        temporal_private_recipient = string(input_buffer);
+                    }
+
+                    *s = 0;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
+                    *s = 0;
+
+                }
+                else if (entered_key == 27) {
                     //If user press [ESC]
                     screen_number=1;
+                    *s = 0;
+                    sscanf(input_buffer, "%d", &connected);
+                    s = input_buffer;
+                    *s = 0;
                 }
-                else if(entered_key==KEY_UP)
-                {
-                    
-
+                else if (entered_key == KEY_BACKSPACE) {
+                    if (s > input_buffer)
+                        *--s = 0;
                 }
-                else if(entered_key==KEY_DOWN)
-                {
-                    
-                    
+                else if (s - input_buffer < (long)sizeof input_buffer - 1) {
+                    *s++ = entered_key;
+                    *s = 0;
                 }
-                else if (entered_key=='\n') 
-                {
-                    screen_number=6;
-                   
-                }
-
             }
         }
         else if(screen_number==6)
         {
             // Private chat
-            
+            string title = "--- New Private Message To " + temporal_private_recipient + "---";
+            mvprintw(0, 0, title.c_str());
+
+            temporal_private_message = "";
+            sent_request = false;
+
             mvprintw(y-4, 0, "> %s", input_buffer);
             refresh();
-
-
 
             if ((entered_key = getch()) != ERR) {
                 if (entered_key == '\n') {
                     //If user press [ENTER]
-                    
+                    // Set message content
+
+                    if(strlen(input_buffer) > 0) 
+                    {
+                        temporal_private_message = string(input_buffer);
+                        if (!sent_request) {
+                            send_message_to_server(username, server_ip, Payload_PayloadFlag_private_chat,
+                                temporal_private_message, temporal_private_recipient, buffer, socket_fd);
+                            add_new_inbox_message(PRIVATE_SENDER, "(Me -> " + temporal_private_recipient + "): " + temporal_private_message);
+                            sent_request = true;
+                        }
+                    }
+
+
                     *s = 0;
                     sscanf(input_buffer, "%d", &connected);
                     s = input_buffer;
