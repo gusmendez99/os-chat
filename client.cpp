@@ -19,7 +19,7 @@
 
 #define IP "127.0.0.1"
 #define DELAY 50
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 8192
 #define CONNECTED 1
 #define DISCONNECTED 0
 #define BROADCAST_SENDER "broadcast"
@@ -727,7 +727,7 @@ int main(int argc, char *argv[])
                         if (!sent_request) {
                             send_message_to_server(username, server_ip, Payload_PayloadFlag_private_chat,
                                 temporal_private_message, temporal_private_recipient, buffer, socket_fd);
-                            // add_new_inbox_message(PRIVATE_SENDER, "(Me -> " + temporal_private_recipient + "): " + temporal_private_message);
+                            add_new_inbox_message(PRIVATE_SENDER, "(Me -> " + temporal_private_recipient + "): " + temporal_private_message);
                             sent_request = true;
                         }
                     }

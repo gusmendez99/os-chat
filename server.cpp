@@ -14,7 +14,7 @@
 #include "payload.pb.h"
 #include <time.h>
 
-#define BUFFER_SIZE 4096
+#define BUFFER_SIZE 8192
 #define DEFAULT_SENDER "Server"
 #define HTTP_OK 200
 #define HTTP_INTERNAL_ERROR 500
