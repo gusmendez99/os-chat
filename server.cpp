@@ -215,7 +215,7 @@ void *handle_client_connected(void *params)
                     // Real broadcast message
                     Payload *broadcast = new Payload();
                     broadcast->set_sender(DEFAULT_SENDER);
-                    broadcast->set_message("BM (" + payload.sender() + "): " + payload.message() + "\n");
+                    broadcast->set_message(payload.sender() + " (general): " + payload.message() + "\n");
                     broadcast->set_code(HTTP_OK);
 
                     string binary;
@@ -227,8 +227,9 @@ void *handle_client_connected(void *params)
                     {
                         User *u = itr->second;
                         // We manage the current user broadcast because we already know the message...
-                        if (u->username != new_user->username)
+                        if (u->username != new_user->username) {
                             send(u->socket, buffer, binary.size() + 1, 0);
+                        }
                     }
                     activity_check();
 
@@ -249,8 +250,9 @@ void *handle_client_connected(void *params)
                         // Real private message
                         Payload *private_msg = new Payload();
                         private_msg->set_sender(current_user.username);
-                        private_msg->set_message("PM (" + payload.sender() + "): " + payload.message() + "\n");
+                        private_msg->set_message(payload.sender() + " (private): " + payload.message() + "\n");
                         private_msg->set_code(HTTP_OK);
+                        private_msg->set_flag(payload.flag());
 
                         string binary;
                         private_msg->SerializeToString(&binary);

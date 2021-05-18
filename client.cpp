@@ -311,23 +311,25 @@ void *listen(void *args){
             break;
 		}
 
-        if (payload.code() == 200) 
+        if (payload.code() == 200 || payload.flag() == Payload_PayloadFlag_general_chat) 
         {
             
             // MESSAGES PURPOSE 
 
             // Omit server logs, just add general/private message if message has this pattern:
             /*
-                @ricardoVA999:  "Mensaje general de " for broadcast
+                @ricardoVA999:  
+                                "Mensaje general de " for broadcast
                                 "Mensaje privado de " for private
-                @aeaa1998:      "(general):"
-                                (private): 
+                @aeaa1998 & @gusmendez99:
+                                "(general):"
+                                "(private):"
             */
 
             // Broadcast Messages
+            bool is_real_broadcast = false, is_real_private = false;
             if(payload.flag() == Payload_PayloadFlag_general_chat) {
                 //Omit broadcast that just have Server Log Info (not a real broadcast message)
-                bool is_real_broadcast = false;
                 for (int i = 0; i < 2; i++) 
                 {
                     if (message.find(classmates_broadcast_pattern[i]) != string::npos) 
@@ -341,7 +343,6 @@ void *listen(void *args){
             // Private Messages
             else if (payload.flag() == Payload_PayloadFlag_private_chat) {
                 //Omit private message that just have Server Log Info (not a real private message)
-                bool is_real_private = false;
                 for (int i = 0; i < 2; i++) 
                 {
                     if (message.find(classmates_private_pattern[i]) != string::npos)
@@ -354,7 +355,7 @@ void *listen(void *args){
             }
 
             has_server_response = true;
-            current_server_message = message;
+            if(!is_real_broadcast && !is_real_private) current_server_message = message;
             current_error_message = "";
         } else 
         {
@@ -619,7 +620,7 @@ int main(int argc, char *argv[])
                         if (!sent_request) {
                             send_message_to_server(username, server_ip, Payload_PayloadFlag_general_chat,
                                 string(input_buffer), "", buffer, socket_fd);
-                            add_new_inbox_message(BROADCAST_SENDER, "(Me) " + string(input_buffer));
+                            // add_new_inbox_message(BROADCAST_SENDER, "(Me) " + string(input_buffer));
                             sent_request = true;
                         }
                     }
@@ -726,7 +727,7 @@ int main(int argc, char *argv[])
                         if (!sent_request) {
                             send_message_to_server(username, server_ip, Payload_PayloadFlag_private_chat,
                                 temporal_private_message, temporal_private_recipient, buffer, socket_fd);
-                            add_new_inbox_message(PRIVATE_SENDER, "(Me -> " + temporal_private_recipient + "): " + temporal_private_message);
+                            // add_new_inbox_message(PRIVATE_SENDER, "(Me -> " + temporal_private_recipient + "): " + temporal_private_message);
                             sent_request = true;
                         }
                     }
